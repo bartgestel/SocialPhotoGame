@@ -1,0 +1,23 @@
+version: '3.8'
+  postgres_data:
+volumes:
+
+      retries: 5
+      timeout: 5s
+      interval: 10s
+      test: ["CMD-SHELL", "pg_isready -U user -d social_app"]
+    healthcheck:
+      - postgres_data:/var/lib/postgresql/data
+    volumes:
+      - "5432:5432"
+    ports:
+      POSTGRES_DB: social_app
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: user
+    environment:
+    container_name: social_photo_game_db
+    image: postgres:16-alpine
+  postgres:
+services:
+
+
