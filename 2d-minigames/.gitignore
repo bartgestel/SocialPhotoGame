@@ -79,18 +79,3 @@ sysinfo.txt
 
 .vscode/
 
-# ====================== #
-# Optional: Large assets #
-# ====================== #
-
-# Git LFS recommended for large binaries
-*.psd
-*.png
-*.jpg
-*.fbx
-*.mp4
-*.wav
-*.mp3
-*.ogg
-*.anim
-*.prefab
