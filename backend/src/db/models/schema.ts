@@ -1,5 +1,15 @@
-// typescript
-import { pgTable, text, timestamp, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, integer, pgEnum, unique, index, jsonb, foreignKey } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
+
+// --------------------------------------------------------------------------------
+// 1. ENUMS
+// --------------------------------------------------------------------------------
+export const friendshipStatusEnum = pgEnum('friendship_status', ['PENDING', 'ACCEPTED', 'BLOCKED']);
+export const pictureStatusEnum = pgEnum('picture_status', ['LOCKED', 'UNLOCKED', 'VIEWED', 'EXPIRED']);
+
+// --------------------------------------------------------------------------------
+// 2. AUTHENTICATION TABLES (From your provided schema)
+// --------------------------------------------------------------------------------
 
 export const user = pgTable("user", {
     id: text("id").primaryKey(),
@@ -9,6 +19,12 @@ export const user = pgTable("user", {
     image: text("image"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").notNull().$onUpdate(() => new Date()),
+
+    // [Added for SnapGame]
+    // Username is distinct from 'name' (display name) and needed for friend requests
+    username: text('username').unique(),
+    currentStreak: integer('current_streak').default(0),
+    lastActiveAt: timestamp('last_active_at', { withTimezone: true }).defaultNow(),
 });
 
 export const session = pgTable("session", {
@@ -49,4 +65,81 @@ export const verification = pgTable("verification", {
     expiresAt: timestamp("expires_at").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").notNull().$onUpdate(() => new Date()),
+});
+
+// --------------------------------------------------------------------------------
+// 3. SOCIAL & GAME TABLES
+// --------------------------------------------------------------------------------
+
+// Friendships Table
+export const friendships = pgTable('friendships', {
+    friendshipId: text('friendship_id').primaryKey(), // Changed to text to match schema style
+    requesterId: text('requester_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+    addresseeId: text('addressee_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+    status: friendshipStatusEnum('status').default('PENDING'),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+}, (table) => ({
+    uniqueFriendship: unique('unique_friendship').on(table.requesterId, table.addresseeId),
+    lookupIdx: index('idx_friendships_lookup').on(table.requesterId, table.addresseeId),
+    // Partial indexes for querying active friend lists efficiently
+    activeRequesterIdx: index('idx_active_friends_req').on(table.requesterId).where(sql`status = 'ACCEPTED'`),
+    activeAddresseeIdx: index('idx_active_friends_addr').on(table.addresseeId).where(sql`status = 'ACCEPTED'`),
+}));
+
+// Games Library Table
+export const games = pgTable('games', {
+    gameId: integer('game_id').primaryKey().generatedAlwaysAsIdentity(),
+    name: text('name').notNull(), // Changed varchar to text for consistency, though varchar is fine
+    description: text('description'),
+    difficultyLevel: integer('difficulty_level').default(1),
+    assetBundleUrl: text('asset_bundle_url'),
+    isActive: boolean('is_active').default(true),
+});
+
+// Pictures Table (Content)
+export const pictures = pgTable('pictures', {
+    pictureId: text('picture_id').primaryKey(),
+    senderId: text('sender_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+
+    // Content
+    mediaUrl: text('media_url').notNull(),
+    mediaType: text('media_type').default('IMAGE'), // Simplified to text
+    viewDuration: integer('view_duration').default(10),
+
+    // Game Config
+    requiredGameId: integer('required_game_id').references(() => games.gameId),
+    gameConfig: jsonb('game_config'),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }),
+}, (table) => ({
+    cleanupIdx: index('idx_pictures_cleanup').on(table.expiresAt),
+}));
+
+// Picture Recipients Table (Delivery Status)
+export const pictureRecipients = pgTable('picture_recipients', {
+    recipientRecordId: text('recipient_record_id').primaryKey(),
+    pictureId: text('picture_id').notNull().references(() => pictures.pictureId, { onDelete: 'cascade' }),
+    receiverId: text('receiver_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+
+    status: pictureStatusEnum('status').default('LOCKED'),
+
+    receivedAt: timestamp('received_at', { withTimezone: true }).defaultNow(),
+    openedAt: timestamp('opened_at', { withTimezone: true }),
+}, (table) => ({
+    uniqueReceiver: unique('unique_picture_receiver').on(table.pictureId, table.receiverId),
+    inboxFeedIdx: index('idx_inbox_feed').on(table.receiverId, table.status).where(sql`status IN ('LOCKED', 'UNLOCKED')`),
+}));
+
+// Unlock Attempts (Game Sessions)
+export const unlockAttempts = pgTable('unlock_attempts', {
+    attemptId: text('attempt_id').primaryKey(),
+    recipientRecordId: text('recipient_record_id').notNull().references(() => pictureRecipients.recipientRecordId, { onDelete: 'cascade' }),
+
+    scoreAchieved: integer('score_achieved').default(0),
+    isSuccessful: boolean('is_successful').default(false),
+
+    startedAt: timestamp('started_at', { withTimezone: true }).defaultNow(),
+    completedAt: timestamp('completed_at', { withTimezone: true }),
 });
