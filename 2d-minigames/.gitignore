@@ -1,0 +1,96 @@
+# =============== #
+# Unity generated #
+# =============== #
+
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Mm]emoryCaptures/
+UserSettings/
+AssetStoreTools*
+
+# Cache files
+*.pidb
+*.suo
+*.user
+*.userprefs
+*.unityproj
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# =================== #
+# Visual Studio / C#  #
+# =================== #
+
+.vs/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# ================ #
+# Rider / JetBrains #
+# ================ #
+
+.idea/
+*.sln.iml
+
+# ================== #
+# System / OS files  #
+# ================== #
+
+.DS_Store
+Thumbs.db
+
+# ================ #
+# Build artifacts   #
+# ================ #
+
+*.apk
+*.aab
+*.unitypackage
+
+# ================ #
+# Crash / debug     #
+# ================ #
+
+sysinfo.txt
+
+# ====================== #
+# VSCode specific        #
+# ====================== #
+
+.vscode/
+
+# ====================== #
+# Optional: Large assets #
+# ====================== #
+
+# Git LFS recommended for large binaries
+*.psd
+*.png
+*.jpg
+*.fbx
+*.mp4
+*.wav
+*.mp3
+*.ogg
+*.anim
+*.prefab
