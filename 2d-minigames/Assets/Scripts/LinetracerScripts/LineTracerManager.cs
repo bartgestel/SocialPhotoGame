@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -7,9 +8,14 @@ public class LineTracerManager : MonoBehaviour
     public float allowedDistance = 0.5f;
     public GameObject starContainer;
 
+    [Header("Line Visual")]
+    public LineRenderer lineRenderer;
+    private List<Vector3> linePositions = new List<Vector3>();
+
     private Camera mainCamera;
     private bool isDrawing = false;
     private bool gameOver = false;
+
     private StarPiece[] allPieces;
     private int totalPieces;
     private int tracedPieces = 0;
@@ -20,7 +26,6 @@ public class LineTracerManager : MonoBehaviour
         allPieces = starContainer.GetComponentsInChildren<StarPiece>();
         totalPieces = allPieces.Length;
 
-        Debug.Log($"Line Tracer started with {totalPieces} pieces");
     }
 
     private void Update()
@@ -32,23 +37,49 @@ public class LineTracerManager : MonoBehaviour
         if (Mouse.current.leftButton.wasPressedThisFrame)
         {
             isDrawing = true;
-            Debug.Log("Started drawing");
+            linePositions.Clear();
+
+            if (lineRenderer != null)
+            {
+                lineRenderer.positionCount = 0;
+            }
         }
 
         if (Mouse.current.leftButton.isPressed && isDrawing)
         {
             CheckMousePosition(mousePos);
+            UpdateLine(mousePos);
         }
 
-        // NIEUWE REGEL: Als speler stopt met klikken = automatisch game over
         if (Mouse.current.leftButton.wasReleasedThisFrame)
         {
             if (tracedPieces < totalPieces)
             {
-                Debug.Log("Released mouse before completing - GAME OVER");
                 GameOver();
             }
+
             isDrawing = false;
+
+            if (lineRenderer != null)
+            {
+                lineRenderer.positionCount = 0;
+                linePositions.Clear();
+            }
+        }
+    }
+
+    private void UpdateLine(Vector2 mousePos)
+    {
+        if (lineRenderer == null) return;
+
+        Vector3 pos = new Vector3(mousePos.x, mousePos.y, 0);
+
+        if (linePositions.Count == 0 ||
+            Vector3.Distance(pos, linePositions[linePositions.Count - 1]) > 0.05f)
+        {
+            linePositions.Add(pos);
+            lineRenderer.positionCount = linePositions.Count;
+            lineRenderer.SetPositions(linePositions.ToArray());
         }
     }
 
@@ -82,18 +113,15 @@ public class LineTracerManager : MonoBehaviour
 
     private float GetClosestDistanceToStar(Vector2 mousePos)
     {
-        float closestDistance = float.MaxValue;
+        float closest = float.MaxValue;
 
         foreach (StarPiece piece in allPieces)
         {
-            float distance = Vector2.Distance(mousePos, piece.transform.position);
-            if (distance < closestDistance)
-            {
-                closestDistance = distance;
-            }
+            float dist = Vector2.Distance(mousePos, piece.transform.position);
+            if (dist < closest) closest = dist;
         }
 
-        return closestDistance;
+        return closest;
     }
 
     public void PieceTraced()
@@ -120,5 +148,11 @@ public class LineTracerManager : MonoBehaviour
         isDrawing = false;
 
         Debug.Log(" GAME OVER! You went outside the lines! ");
+
+        if (lineRenderer != null)
+        {
+            lineRenderer.positionCount = 0;
+            linePositions.Clear();
+        }
     }
 }
