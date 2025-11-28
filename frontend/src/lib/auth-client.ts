@@ -2,7 +2,7 @@ import { createAuthClient } from "better-auth/react"
 
 // Use same API base URL logic as api.ts
 // For Docker/nginx proxy, use window.location.origin to get current origin
-const API_BASE_URL = import.meta.env.VITE_API_URL !== undefined
+const API_BASE_URL = (import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL !== '')
     ? import.meta.env.VITE_API_URL 
     : '';
 
