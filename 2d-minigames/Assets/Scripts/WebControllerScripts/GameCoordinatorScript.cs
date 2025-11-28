@@ -21,7 +21,7 @@ public class GameCoordinatorScript : MonoBehaviour {
     private string _currentUnityScene;
     private string _currentGameId;
     private const string SECRET_KEY = "A64814991BEEC14ED7747FE2E1AFD"; // Must match backend
-    private const string API_URL = "http://localhost:3000/api/games/verify";
+    private const string API_URL = "http://51.210.96.168/api/games/verify";
 
     [DllImport("__Internal")]
     private static extern void ReportUnlockToReact(string gameId);

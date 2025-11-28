@@ -47,6 +47,9 @@ importers:
       pg:
         specifier: ^8.16.3
         version: 8.16.3
+      pnpm:
+        specifier: ^10.24.0
+        version: 10.24.0
       postgres:
         specifier: ^3.4.7
         version: 3.4.7
@@ -1248,6 +1251,11 @@ packages:
   picomatch@2.3.1:
     resolution: {integrity: sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA==}
     engines: {node: '>=8.6'}
+
+  pnpm@10.24.0:
+    resolution: {integrity: sha512-Af+K5xtEGZA7ZcYPstydNM+LtuBtA73hEu8496NNaQTEJLpmvqXNzxKJAjC/OflYBHMUDtnJRv7zKLblI4o0Wg==}
+    engines: {node: '>=18.12'}
+    hasBin: true
 
   postgres-array@2.0.0:
     resolution: {integrity: sha512-VpZrUqU5A69eQyW2c5CA1jtLecCsN2U/bD6VilrFDWq5+5UIEVO7nazS3TEcHf1zuPYO/sqGvUvW62g86RXZuA==}
@@ -2607,6 +2615,8 @@ snapshots:
       split2: 4.2.0
 
   picomatch@2.3.1: {}
+
+  pnpm@10.24.0: {}
 
   postgres-array@2.0.0: {}
 
