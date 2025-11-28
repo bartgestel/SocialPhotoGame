@@ -7,9 +7,6 @@
 bartvangestel.nl, www.bartvangestel.nl {
     # Caddy automatically handles HTTPS with Let's Encrypt
     
-    # Reverse proxy to frontend for all other requests
-    reverse_proxy frontend:80
-
     # API requests go to backend
     handle /api* {
         reverse_proxy backend:3000
@@ -20,8 +17,6 @@ bartvangestel.nl, www.bartvangestel.nl {
         reverse_proxy backend:3000
     }
 
-    # Unity WebGL games
-    handle /game* {
-        reverse_proxy backend:3000
-    }
+    # Everything else (including /game) goes to frontend
+    reverse_proxy frontend:80
 }

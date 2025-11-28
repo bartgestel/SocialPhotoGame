@@ -19,7 +19,14 @@ const app = express();
 const PORT = 3000;
 
 app.use(cors({
-    origin: ["http://localhost:5173", "http://localhost", "http://51.210.96.168", "http://51.210.96.168:3000"],
+    origin: [
+        "http://localhost:5173", 
+        "http://localhost", 
+        "https://bartvangestel.nl",
+        "https://www.bartvangestel.nl",
+        "http://bartvangestel.nl",
+        "http://www.bartvangestel.nl"
+    ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allowedHeaders: ["Content-Type", "Authorization", "Cookie", "Set-Cookie", "X-Requested-With"],
