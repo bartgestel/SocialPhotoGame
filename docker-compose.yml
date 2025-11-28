@@ -1,23 +1,64 @@
 version: '3.8'
-  postgres_data:
-volumes:
 
-      retries: 5
-      timeout: 5s
-      interval: 10s
-      test: ["CMD-SHELL", "pg_isready -U user -d social_app"]
-    healthcheck:
-      - postgres_data:/var/lib/postgresql/data
-    volumes:
-      - "5432:5432"
-    ports:
-      POSTGRES_DB: social_app
-      POSTGRES_PASSWORD: password
-      POSTGRES_USER: user
-    environment:
-    container_name: social_photo_game_db
-    image: postgres:16-alpine
-  postgres:
 services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: socialphotogame-db
+    environment:
+      POSTGRES_DB: socialphotogame
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: socialphotogame-backend
+    environment:
+      DATABASE_URL: postgresql://postgres:${DB_PASSWORD}@postgres:5432/socialphotogame
+      BETTER_AUTH_SECRET: ${BETTER_AUTH_SECRET}
+      BETTER_AUTH_URL: ${BETTER_AUTH_URL:-http://localhost}
+      GAME_SECRET_KEY: ${GAME_SECRET_KEY}
+      NODE_ENV: production
+      PORT: 3000
+    volumes:
+      - ./backend/uploads:/app/uploads
+      - ./Build:/app/unity-games:ro
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL:-http://localhost:3000}
+    container_name: socialphotogame-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  default:
+    name: socialphotogame-network
 
 
