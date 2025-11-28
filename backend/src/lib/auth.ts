@@ -9,12 +9,12 @@ export const auth = betterAuth({
         schema: { ...schema }
     }),
 
-    trustedOrigins: ["http://localhost:3000", "http://localhost:5173"],
+    trustedOrigins: ["http://localhost:3000", "http://localhost:5173", "http://51.210.96.168"],
 
     advanced: {
         defaultCookieAttributes: {
-            secure: false,
-            sameSite: "lax"
+            sameSite: "lax",
+            secure: false
         }
     },
     emailAndPassword: { enabled: true },
