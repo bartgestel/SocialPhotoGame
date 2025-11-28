@@ -22,11 +22,13 @@ interface UnlockData {
 const Game: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const shareToken = searchParams.get('shareToken');
-  const anonymousIdParam = searchParams.get('anonymousId');
-  
+  const shareToken = searchParams.get("shareToken");
+  const anonymousIdParam = searchParams.get("anonymousId");
+
   // State
-  const [sessionConfig, setSessionConfig] = useState<SessionConfig | null>(null);
+  const [sessionConfig, setSessionConfig] = useState<SessionConfig | null>(
+    null
+  );
   const [reward, setReward] = useState<string | null>(null);
   const [unlockedPicture, setUnlockedPicture] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -53,11 +55,15 @@ const Game: React.FC = () => {
   }, [shareToken]);
 
   // 1. User selects a game -> Get Config from Backend
-  const handleSelectGame = async (gameId: string | null, token?: string, anonId?: string) => {
+  const handleSelectGame = async (
+    gameId: string | null,
+    token?: string,
+    anonId?: string
+  ) => {
     try {
       setLoading(true);
       const requestData: any = {};
-      
+
       if (token) {
         // Picture unlock mode
         requestData.shareToken = token;
@@ -68,8 +74,8 @@ const Game: React.FC = () => {
       }
 
       const response = await api.startGame(
-        requestData.gameId || '', 
-        requestData.shareToken, 
+        requestData.gameId || "",
+        requestData.shareToken,
         requestData.anonymousId
       );
 
@@ -135,10 +141,13 @@ const Game: React.FC = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
         <div className="bg-white rounded-lg shadow-lg p-8 max-w-2xl w-full">
           <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Picture Unlocked! 🎉</h2>
+            <h2 className="text-2xl font-bold text-gray-900">
+              Picture Unlocked! 🎉
+            </h2>
             <p className="mt-2 text-gray-600">
               From {unlockedPicture.sender.name}
-              {unlockedPicture.sender.username && ` (@${unlockedPicture.sender.username})`}
+              {unlockedPicture.sender.username &&
+                ` (@${unlockedPicture.sender.username})`}
             </p>
           </div>
 
@@ -152,7 +161,8 @@ const Game: React.FC = () => {
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-500">
-              Shared on {new Date(unlockedPicture.createdAt).toLocaleDateString()}
+              Shared on{" "}
+              {new Date(unlockedPicture.createdAt).toLocaleDateString()}
             </p>
           </div>
 

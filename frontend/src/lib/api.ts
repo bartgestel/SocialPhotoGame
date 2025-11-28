@@ -1,4 +1,7 @@
-const API_BASE_URL = 'http://localhost:3000';
+// Use relative URL for API calls - nginx will proxy to backend
+// In development with Vite, this will use the dev server proxy
+// In production with Docker, this will use nginx proxy
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
 export const api = {
     // Friends endpoints
