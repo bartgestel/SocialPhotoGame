@@ -10,7 +10,6 @@ public class StarPiece : MonoBehaviour
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
 
-        // Vind de manager
         manager = FindObjectOfType<LineTracerManager>();
     }
 
