@@ -11,7 +11,15 @@ export const auth = betterAuth({
 
     baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
     
-    trustedOrigins: ["http://localhost:3000", "http://localhost:5173", "http://localhost", "http://51.210.96.168", "http://51.210.96.168:3000"],
+    trustedOrigins: [
+        "http://localhost:3000", 
+        "http://localhost:5173", 
+        "http://localhost", 
+        "http://51.210.96.168", 
+        "http://51.210.96.168:3000",
+        "https://51.210.96.168",
+        "https://51.210.96.168:443"
+    ],
 
     session: {
         cookieCache: {
@@ -23,7 +31,7 @@ export const auth = betterAuth({
     advanced: {
         defaultCookieAttributes: {
             sameSite: "lax",
-            secure: false,
+            secure: process.env.NODE_ENV === "production",
             path: "/",
             httpOnly: true,
             domain: undefined // Let browser determine domain

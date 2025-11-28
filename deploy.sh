@@ -35,8 +35,9 @@ docker compose logs --tail=50
 
 echo ""
 echo "✅ Deployment complete!"
-echo "🌐 Frontend: http://localhost"
-echo "🔌 Backend API: http://localhost:3000"
+echo "🌐 Frontend: https://localhost (or your server IP)"
+echo "🔌 Backend API: Proxied through frontend"
+echo "⚠️  Browser will warn about self-signed certificate - click 'Advanced' and 'Proceed'"
 echo ""
 echo "📊 View logs: docker-compose logs -f"
 echo "🛑 Stop: docker-compose down"

@@ -1,0 +1,28 @@
+{
+    # Use self-signed certificates for IP address
+    auto_https disable_redirects
+}
+
+# Replace with your actual VPS IP address
+:80, :443 {
+    # Enable HTTPS with self-signed cert for IP
+    tls internal
+
+    # Reverse proxy to frontend for all other requests
+    reverse_proxy frontend:80
+
+    # API requests go to backend
+    handle /api* {
+        reverse_proxy backend:3000
+    }
+
+    # Uploaded files
+    handle /uploads* {
+        reverse_proxy backend:3000
+    }
+
+    # Unity WebGL games
+    handle /game* {
+        reverse_proxy backend:3000
+    }
+}
