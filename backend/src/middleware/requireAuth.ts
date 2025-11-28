@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from "express";
-import { auth } from "../lib/auth";
+import type { Request, Response, NextFunction } from "express";
+import { auth } from "../lib/auth.js";
 
 export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
     try {

@@ -104,32 +104,42 @@ export const pictures = pgTable('pictures', {
 
     // Content
     mediaUrl: text('media_url').notNull(),
-    mediaType: text('media_type').default('IMAGE'), // Simplified to text
-    viewDuration: integer('view_duration').default(10),
+    mediaType: text('media_type').default('IMAGE'),
 
     // Game Config
     requiredGameId: integer('required_game_id').references(() => games.gameId),
     gameConfig: jsonb('game_config'),
 
+    // Sharing via link
+    shareToken: text('share_token').unique().notNull(),
+    maxUnlocks: integer('max_unlocks').default(0), // 0 = unlimited
+    currentUnlocks: integer('current_unlocks').default(0),
+
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
     expiresAt: timestamp('expires_at', { withTimezone: true }),
 }, (table) => ({
     cleanupIdx: index('idx_pictures_cleanup').on(table.expiresAt),
+    shareTokenIdx: index('idx_pictures_share_token').on(table.shareToken),
 }));
 
 // Picture Recipients Table (Delivery Status)
 export const pictureRecipients = pgTable('picture_recipients', {
     recipientRecordId: text('recipient_record_id').primaryKey(),
     pictureId: text('picture_id').notNull().references(() => pictures.pictureId, { onDelete: 'cascade' }),
-    receiverId: text('receiver_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+    
+    // OPTIONAL: Can be null for anonymous recipients
+    receiverId: text('receiver_id').references(() => user.id, { onDelete: 'cascade' }),
+    
+    // For tracking anonymous users
+    recipientIdentifier: text('recipient_identifier'), // Session ID, fingerprint, or anonymous ID
 
     status: pictureStatusEnum('status').default('LOCKED'),
 
     receivedAt: timestamp('received_at', { withTimezone: true }).defaultNow(),
     openedAt: timestamp('opened_at', { withTimezone: true }),
 }, (table) => ({
-    uniqueReceiver: unique('unique_picture_receiver').on(table.pictureId, table.receiverId),
-    inboxFeedIdx: index('idx_inbox_feed').on(table.receiverId, table.status).where(sql`status IN ('LOCKED', 'UNLOCKED')`),
+    inboxFeedIdx: index('idx_inbox_feed').on(table.receiverId, table.status).where(sql`receiver_id IS NOT NULL AND status IN ('LOCKED', 'UNLOCKED')`),
+    pictureIdx: index('idx_recipients_by_picture').on(table.pictureId),
 }));
 
 // Unlock Attempts (Game Sessions)

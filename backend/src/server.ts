@@ -1,11 +1,18 @@
 import express from 'express';
 import { toNodeHandler } from 'better-auth/node';
-import { auth } from './lib/auth';
-import { db } from './config/db';
+import { auth } from './lib/auth.js';
+import { db } from './config/db.js';
 import { sql } from 'drizzle-orm';
 import cors from "cors";
-import friendRoute from './routes/friendRoute';
-import userRoute from './routes/userRoute';
+import path from "path";
+import { fileURLToPath } from 'url';
+import friendRoute from './routes/friendRoute.js';
+import userRoute from './routes/userRoute.js';
+import gameRoute from './routes/gameRoute.js';
+import pictureRoute from './routes/pictureRoute.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 
 const app = express();
@@ -19,6 +26,9 @@ app.use(cors({
 }));
 
 app.use(express.json());
+
+// Serve static files from uploads directory
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 app.use((req, res, next) => {
     console.log(`Incoming: [${req.method}] ${req.url}`);
@@ -37,6 +47,10 @@ app.all(/\/api\/auth\/*/, async (req, res) => {
 app.use('/api/friends', friendRoute);
 
 app.use('/api/users', userRoute);
+
+app.use('/api/games', gameRoute);
+
+app.use('/api/pictures', pictureRoute);
 
 async function start() {
     try {
