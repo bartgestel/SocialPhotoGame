@@ -36,8 +36,7 @@ export default function UnlockPicture() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [pictureInfo, setPictureInfo] = useState<PictureInfo | null>(null);
-  const [unlockedPicture, setUnlockedPicture] =
-    useState<UnlockedPicture | null>(null);
+  const [unlockedPicture] = useState<UnlockedPicture | null>(null);
   const [anonymousId, setAnonymousId] = useState<string>("");
 
   useEffect(() => {
