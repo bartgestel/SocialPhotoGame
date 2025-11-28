@@ -1,6 +1,6 @@
-import { Request, Response } from "express";
-import { db } from "../config/db";
-import { user } from "../db/models/schema";
+import type { Request, Response } from "express";
+import { db } from "../config/db.js";
+import { user } from "../db/models/schema.js";
 import { ilike, eq } from "drizzle-orm";
 
 export const getUserById = async (req: Request, res: Response) => {

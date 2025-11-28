@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 import { db } from "../config/db";
 import { friendships } from "../db/models/schema";
 import { or, and, eq } from "drizzle-orm";

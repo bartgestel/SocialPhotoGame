@@ -63,5 +63,66 @@ export const api = {
         if (!response.ok) throw new Error('Failed to search users');
         return response.json();
     },
-};
 
+    // Picture endpoints
+    uploadPicture: async (formData: FormData) => {
+        const response = await fetch(`${API_BASE_URL}/api/pictures/upload`, {
+            method: 'POST',
+            credentials: 'include',
+            body: formData, // Don't set Content-Type, browser will set it with boundary
+        });
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Failed to upload picture');
+        }
+        return response.json();
+    },
+
+    getMyPictures: async () => {
+        const response = await fetch(`${API_BASE_URL}/api/pictures/my-pictures`, {
+            credentials: 'include',
+        });
+        if (!response.ok) throw new Error('Failed to fetch pictures');
+        return response.json();
+    },
+
+    getPictureByToken: async (shareToken: string) => {
+        const response = await fetch(`${API_BASE_URL}/api/pictures/token/${shareToken}`);
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Failed to fetch picture');
+        }
+        return response.json();
+    },
+
+    getPictureMedia: async (pictureId: string, anonymousId: string) => {
+        return `${API_BASE_URL}/api/pictures/${pictureId}/media/${anonymousId}`;
+    },
+
+    // Game endpoints
+    startGame: async (gameId: string, shareToken?: string, anonymousId?: string) => {
+        const response = await fetch(`${API_BASE_URL}/api/games/start`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ gameId, shareToken, anonymousId }),
+        });
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Failed to start game');
+        }
+        return response.json();
+    },
+
+    verifyGame: async (sessionId: string, signature: string, score?: number) => {
+        const response = await fetch(`${API_BASE_URL}/api/games/verify`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId, signature, score }),
+        });
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Failed to verify game');
+        }
+        return response.json();
+    },
+};
