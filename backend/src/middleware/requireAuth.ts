@@ -3,7 +3,15 @@ import { auth } from "../lib/auth.js";
 
 export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const session = await auth.api.getSession({ headers: req.headers });
+        // Convert Express headers to Headers object
+        const headers = new Headers();
+        Object.entries(req.headers).forEach(([key, value]) => {
+            if (value) {
+                headers.append(key, Array.isArray(value) ? value.join(', ') : value);
+            }
+        });
+
+        const session = await auth.api.getSession({ headers });
 
         if (!session) {
             return res.status(401).json({ error: "Unauthorized" });
