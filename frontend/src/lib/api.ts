@@ -1,11 +1,11 @@
 // Use environment variable for API base URL
 // In Docker with nginx proxy: VITE_API_URL should be empty string (uses relative URLs like /api/*)
-// In local development: VITE_API_URL defaults to http://localhost:3000
-const API_BASE_URL = import.meta.env.VITE_API_URL !== undefined 
+// In local development: defaults to http://localhost:3000
+const API_BASE_URL = typeof import.meta.env.VITE_API_URL === 'string' && import.meta.env.VITE_API_URL !== undefined
     ? import.meta.env.VITE_API_URL 
-    : 'http://localhost:3000';
+    : (import.meta.env.DEV ? 'http://localhost:3000' : '');
 
-console.log('API_BASE_URL:', API_BASE_URL);
+console.log('API_BASE_URL:', JSON.stringify(API_BASE_URL), 'DEV mode:', import.meta.env.DEV);
 
 export const api = {
     // Friends endpoints

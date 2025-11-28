@@ -14,9 +14,9 @@ RUN pnpm install --frozen-lockfile
 # Copy source
 COPY . .
 
-# Build argument for API URL
-ARG VITE_API_URL
-ENV VITE_API_URL=$VITE_API_URL
+# Build argument for API URL - default to empty for Docker nginx proxy
+ARG VITE_API_URL=""
+ENV VITE_API_URL=${VITE_API_URL}
 
 # Build
 RUN pnpm run build
