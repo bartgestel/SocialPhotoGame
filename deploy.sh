@@ -35,9 +35,9 @@ docker compose logs --tail=50
 
 echo ""
 echo "✅ Deployment complete!"
-echo "🌐 Frontend: https://localhost (or your server IP)"
+echo "🌐 Frontend: https://bartvangestel.nl"
 echo "🔌 Backend API: Proxied through frontend"
-echo "⚠️  Browser will warn about self-signed certificate - click 'Advanced' and 'Proceed'"
+echo "⏳ First HTTPS request may take 30s while Caddy gets SSL certificate"
 echo ""
 echo "📊 View logs: docker-compose logs -f"
 echo "🛑 Stop: docker-compose down"

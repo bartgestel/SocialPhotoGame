@@ -15,10 +15,10 @@ export const auth = betterAuth({
         "http://localhost:3000", 
         "http://localhost:5173", 
         "http://localhost", 
-        "http://51.210.96.168", 
-        "http://51.210.96.168:3000",
-        "https://51.210.96.168",
-        "https://51.210.96.168:443"
+        "https://bartvangestel.nl",
+        "https://www.bartvangestel.nl",
+        "http://bartvangestel.nl",
+        "http://www.bartvangestel.nl"
     ],
 
     session: {

@@ -6,16 +6,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Runtime.InteropServices;
 
-// Custom certificate handler to accept self-signed certificates
-public class AcceptAllCertificates : CertificateHandler
-{
-    protected override bool ValidateCertificate(byte[] certificateData)
-    {
-        // Accept all certificates (needed for self-signed SSL)
-        return true;
-    }
-}
-
 [System.Serializable]
 public class GameConfig
 {
@@ -31,7 +21,7 @@ public class GameCoordinatorScript : MonoBehaviour {
     private string _currentUnityScene;
     private string _currentGameId;
     private const string SECRET_KEY = "A64814991BEEC14ED7747FE2E1AFD"; // Must match backend
-    private const string API_URL = "https://51.210.96.168/api/games/verify";
+    private const string API_URL = "https://bartvangestel.nl/api/games/verify";
 
     [DllImport("__Internal")]
     private static extern void ReportUnlockToReact(string gameId);
@@ -67,7 +57,6 @@ public class GameCoordinatorScript : MonoBehaviour {
         request.uploadHandler = new UploadHandlerRaw(bodyRaw);
         request.downloadHandler = new DownloadHandlerBuffer();
         request.SetRequestHeader("Content-Type", "application/json");
-        request.certificateHandler = new AcceptAllCertificates();
 
         yield return request.SendWebRequest();
 
