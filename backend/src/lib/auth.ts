@@ -9,7 +9,7 @@ export const auth = betterAuth({
         schema: { ...schema }
     }),
 
-    trustedOrigins: ["http://localhost:3000", "http://localhost:5173", "http://51.210.96.168"],
+    trustedOrigins: ["http://localhost:3000", "http://localhost:5173", "http://51.210.96.168", "http://51.210.96.168:3000"],
 
     advanced: {
         defaultCookieAttributes: {

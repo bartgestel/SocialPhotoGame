@@ -17,9 +17,9 @@ git pull
 
 # Build and start containers
 echo "🐳 Building and starting Docker containers..."
-docker-compose down
-docker-compose build --no-cache
-docker-compose up -d
+docker compose down
+docker compose build --no-cache
+docker compose up -d
 
 # Wait for services to be healthy
 echo "⏳ Waiting for services to start..."
@@ -27,11 +27,11 @@ sleep 15
 
 # Check container status
 echo "📊 Container Status:"
-docker-compose ps
+docker compose ps
 
 # Show logs
 echo "📜 Recent logs:"
-docker-compose logs --tail=50
+docker compose logs --tail=50
 
 echo ""
 echo "✅ Deployment complete!"
