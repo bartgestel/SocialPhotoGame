@@ -3,9 +3,9 @@
     auto_https disable_redirects
 }
 
-# Replace with your actual VPS IP address
-:80, :443 {
-    # Enable HTTPS with self-signed cert for IP
+# Listen on all interfaces for both HTTP and HTTPS
+http://:80, https://:443 {
+    # Enable HTTPS with self-signed cert
     tls internal
 
     # Reverse proxy to frontend for all other requests
