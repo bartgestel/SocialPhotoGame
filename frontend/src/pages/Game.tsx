@@ -4,10 +4,6 @@ import { useSearchParams, useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
 
 // Types
-interface GameOption {
-  id: string;
-  name: string;
-}
 interface SessionConfig {
   sessionId: string;
   unityScene: string;
@@ -30,7 +26,6 @@ const Game: React.FC = () => {
   const anonymousIdParam = searchParams.get('anonymousId');
   
   // State
-  const [selectedGame, setSelectedGame] = useState<GameOption | null>(null);
   const [sessionConfig, setSessionConfig] = useState<SessionConfig | null>(null);
   const [reward, setReward] = useState<string | null>(null);
   const [unlockedPicture, setUnlockedPicture] = useState<any>(null);
@@ -85,7 +80,6 @@ const Game: React.FC = () => {
       }
 
       setSessionConfig(response);
-      setSelectedGame({ id: gameId || 'unlock', name: "Loading..." });
     } catch (err: any) {
       console.error("Could not start session", err);
       alert(err.message || "Failed to start game");
