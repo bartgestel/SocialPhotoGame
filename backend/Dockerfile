@@ -29,8 +29,15 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --prod --frozen-lockfile
 
+# Install drizzle-kit for migrations (needed at runtime)
+RUN pnpm add -D drizzle-kit
+
 # Copy built files
 COPY --from=build /app/dist ./dist
+
+# Copy drizzle config and schema for migrations
+COPY drizzle.config.ts ./
+COPY --from=build /app/src/db ./src/db
 
 # Create uploads directory
 RUN mkdir -p /app/uploads
@@ -40,7 +47,14 @@ EXPOSE 3000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s \
-  CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)}).on('error', () => process.exit(1)}"
+  CMD node -e "require('http').get('http://localhost:3000/api/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)}).on('error', () => process.exit(1))"
 
-# Start the server (migrations should be run manually or via CI/CD)
-CMD ["node", "dist/server.js"]
+# Create startup script that runs migrations then starts server
+RUN echo '#!/bin/sh' > /app/start.sh && \
+    echo 'echo "Running database migrations..."' >> /app/start.sh && \
+    echo 'pnpm drizzle-kit push --force || echo "Migration failed, continuing..."' >> /app/start.sh && \
+    echo 'echo "Starting server..."' >> /app/start.sh && \
+    echo 'exec node dist/server.js' >> /app/start.sh && \
+    chmod +x /app/start.sh
+
+CMD ["/app/start.sh"]
