@@ -23,7 +23,7 @@ export default function SignIn() {
             setError(result.error.message || 'Sign in failed');
             setLoading(false);
         } else {
-            navigate('/home');
+            navigate('/upload');
         }
     };
 

@@ -154,7 +154,9 @@ export const getPictureMedia = async (req: Request, res: Response) => {
         // Mark as viewed if not already
         if (recipient[0].status === 'UNLOCKED') {
             await db
-                .update(pictureRecipients)
+                .update(pictureRecipients)        console.error("Error uploading picture:", error);
+        res.status(500).json({ error: "Failed to upload picture" });
+    }
                 .set({ status: 'VIEWED' })
                 .where(eq(pictureRecipients.recipientRecordId, recipient[0].recipientRecordId));
         }
