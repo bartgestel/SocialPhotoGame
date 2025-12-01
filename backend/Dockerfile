@@ -51,8 +51,12 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=40s \
 
 # Create startup script that runs migrations then starts server
 RUN echo '#!/bin/sh' > /app/start.sh && \
+    echo 'set -e' >> /app/start.sh && \
+    echo 'echo "Waiting for database to be ready..."' >> /app/start.sh && \
+    echo 'sleep 5' >> /app/start.sh && \
     echo 'echo "Running database migrations..."' >> /app/start.sh && \
-    echo 'pnpm drizzle-kit push --force || echo "Migration failed, continuing..."' >> /app/start.sh && \
+    echo 'pnpm drizzle-kit push --force || { echo "Migration failed"; exit 1; }' >> /app/start.sh && \
+    echo 'echo "Migrations completed successfully!"' >> /app/start.sh && \
     echo 'echo "Starting server..."' >> /app/start.sh && \
     echo 'exec node dist/server.js' >> /app/start.sh && \
     chmod +x /app/start.sh
