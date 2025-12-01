@@ -153,7 +153,7 @@ const Game: React.FC = () => {
 
           <div className="relative rounded-lg overflow-hidden bg-gray-100">
             <img
-              src={`http://localhost:3000${unlockedPicture.mediaUrl}`}
+              src={unlockedPicture.mediaUrl}
               alt="Unlocked picture"
               className="w-full h-auto"
             />

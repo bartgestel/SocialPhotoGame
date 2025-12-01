@@ -9,12 +9,32 @@ export const auth = betterAuth({
         schema: { ...schema }
     }),
 
-    trustedOrigins: ["http://localhost:3000", "http://localhost:5173", "http://51.210.96.168", "http://51.210.96.168:3000"],
+    baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+    
+    trustedOrigins: [
+        "http://localhost:3000", 
+        "http://localhost:5173", 
+        "http://localhost", 
+        "https://bartvangestel.nl",
+        "https://www.bartvangestel.nl",
+        "http://bartvangestel.nl",
+        "http://www.bartvangestel.nl"
+    ],
+
+    session: {
+        cookieCache: {
+            enabled: true,
+            maxAge: 5 * 60 // 5 minutes
+        }
+    },
 
     advanced: {
         defaultCookieAttributes: {
             sameSite: "lax",
-            secure: false
+            secure: process.env.NODE_ENV === "production",
+            path: "/",
+            httpOnly: true,
+            domain: undefined // Let browser determine domain
         }
     },
     emailAndPassword: { enabled: true },

@@ -43,7 +43,12 @@ export default function UnlockPicture() {
     // Get or create anonymous ID from localStorage
     let storedId = localStorage.getItem("anonymousId");
     if (!storedId) {
-      storedId = crypto.randomUUID();
+      // Generate UUID fallback for non-secure contexts (HTTP)
+      storedId = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
       localStorage.setItem("anonymousId", storedId);
     }
     setAnonymousId(storedId);
@@ -113,7 +118,7 @@ export default function UnlockPicture() {
         <div className="bg-white rounded-lg shadow-lg p-8 max-w-2xl w-full">
           <div className="text-center mb-6">
             <h2 className="text-2xl font-bold text-gray-900">
-              Picture Unlocked! 🎉
+              Picture Unlocked!
             </h2>
             <p className="mt-2 text-gray-600">
               From {unlockedPicture.sender.name}
@@ -124,7 +129,7 @@ export default function UnlockPicture() {
 
           <div className="relative rounded-lg overflow-hidden bg-gray-100">
             <img
-              src={`http://localhost:3000${unlockedPicture.mediaUrl}`}
+              src={unlockedPicture.mediaUrl}
               alt="Unlocked picture"
               className="w-full h-auto"
             />
@@ -194,13 +199,13 @@ export default function UnlockPicture() {
             <p>🎮 Play a game to unlock this picture</p>
             {pictureInfo.maxUnlocks > 0 && (
               <p>
-                🔓 {pictureInfo.currentUnlocks}/{pictureInfo.maxUnlocks} unlocks
+                {pictureInfo.currentUnlocks}/{pictureInfo.maxUnlocks} unlocks
                 used
               </p>
             )}
             {pictureInfo.expiresAt && (
               <p>
-                ⏰ Expires{" "}
+                Expires{" "}
                 {new Date(pictureInfo.expiresAt).toLocaleDateString()}
               </p>
             )}

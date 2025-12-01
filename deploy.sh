@@ -35,8 +35,9 @@ docker compose logs --tail=50
 
 echo ""
 echo "✅ Deployment complete!"
-echo "🌐 Frontend: http://localhost"
-echo "🔌 Backend API: http://localhost:3000"
+echo "🌐 Frontend: https://bartvangestel.nl"
+echo "🔌 Backend API: Proxied through frontend"
+echo "⏳ First HTTPS request may take 30s while Caddy gets SSL certificate"
 echo ""
 echo "📊 View logs: docker-compose logs -f"
 echo "🛑 Stop: docker-compose down"
