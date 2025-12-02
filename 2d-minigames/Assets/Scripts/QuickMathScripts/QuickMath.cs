@@ -139,6 +139,11 @@ public class QuickMath : MonoBehaviour
         gameActive = false;
         Debug.Log(" YOU WIN! All questions answered! ");
 
+        if (GameCoordinatorScript.Instance != null)
+        {
+            GameCoordinatorScript.Instance.TriggerWin();
+        }
+
         if (currentQuestion != null)
             Destroy(currentQuestion);
     }

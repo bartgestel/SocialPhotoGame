@@ -1,8 +1,8 @@
-import { Router } from "express";
-import { searchUsers, getUserById } from "../controllers/userController";
-import { requireAuth } from "../middleware/requireAuth";
+import { Router, type Router as RouterType } from "express";
+import { searchUsers, getUserById } from "../controllers/userController.js";
+import { requireAuth } from "../middleware/requireAuth.js";
 
-const router = Router();
+const router: RouterType = Router();
 
 // CHAINING LAYERS:
 // Path ("/") -> Middleware (requireAuth) -> Controller (createPost)

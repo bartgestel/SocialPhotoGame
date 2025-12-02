@@ -1,0 +1,22 @@
+{
+    # Email for Let's Encrypt notifications
+    email bart@bartvangestel.nl
+}
+
+# Automatic HTTPS with Let's Encrypt
+bartvangestel.nl, www.bartvangestel.nl {
+    # Caddy automatically handles HTTPS with Let's Encrypt
+    
+    # API requests go to backend
+    handle /api* {
+        reverse_proxy backend:3000
+    }
+
+    # Uploaded files
+    handle /uploads* {
+        reverse_proxy backend:3000
+    }
+
+    # Everything else (including /game) goes to frontend
+    reverse_proxy frontend:80
+}

@@ -1,6 +1,6 @@
-import { Request, Response } from "express";
-import { db } from "../config/db";
-import { friendships } from "../db/models/schema";
+import type { Request, Response } from "express";
+import { db } from "../config/db.js";
+import { friendships } from "../db/models/schema.js";
 import { or, and, eq } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
