@@ -11,6 +11,11 @@ public class EndLevel : MonoBehaviour
             if (remainingBones.Length == 0)
             {
                 Debug.Log("Level completed! All bones collected.");
+                
+                if (GameCoordinatorScript.Instance != null)
+                    {
+                        GameCoordinatorScript.Instance.TriggerWin();
+                    }
             }
             else
             {

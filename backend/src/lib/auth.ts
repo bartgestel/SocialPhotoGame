@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { db } from "../config/db";
-import * as schema from "../db/models/schema";
+import { db } from "../config/db.js";
+import * as schema from "../db/models/schema.js";
 
 export const auth = betterAuth({
     database: drizzleAdapter(db, {
@@ -9,12 +9,32 @@ export const auth = betterAuth({
         schema: { ...schema }
     }),
 
-    trustedOrigins: ["http://localhost:3000", "http://localhost:5173"],
+    baseURL: process.env.BETTER_AUTH_URL || "http://localhost:3000",
+    
+    trustedOrigins: [
+        "http://localhost:3000", 
+        "http://localhost:5173", 
+        "http://localhost", 
+        "https://bartvangestel.nl",
+        "https://www.bartvangestel.nl",
+        "http://bartvangestel.nl",
+        "http://www.bartvangestel.nl"
+    ],
+
+    session: {
+        cookieCache: {
+            enabled: true,
+            maxAge: 5 * 60 // 5 minutes
+        }
+    },
 
     advanced: {
         defaultCookieAttributes: {
-            secure: false,
-            sameSite: "lax"
+            sameSite: "lax",
+            secure: process.env.NODE_ENV === "production",
+            path: "/",
+            httpOnly: true,
+            domain: undefined // Let browser determine domain
         }
     },
     emailAndPassword: { enabled: true },

@@ -7,9 +7,9 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-CONTAINER_NAME="social_photo_game_db"
-DB_NAME="social_app"
-DB_USER="user"
+CONTAINER_NAME="socialphotogame-db"
+DB_NAME="socialphotogame"
+DB_USER="postgres"
 DB_PORT="5432"
 
 echo -e "${BLUE}=== Database Setup ===${NC}\n"

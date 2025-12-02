@@ -83,6 +83,16 @@ web_modules/
 .env.production.local
 .env.local
 
+# Docker volumes and data
+postgres_data/
+
+# Uploads directory (user-generated content)
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Backend build output
+backend/dist/
+
 # parcel-bundler cache (https://parceljs.org/)
 .cache
 .parcel-cache
