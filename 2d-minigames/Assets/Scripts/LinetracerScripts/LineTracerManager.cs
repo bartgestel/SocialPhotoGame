@@ -12,6 +12,10 @@ public class LineTracerManager : MonoBehaviour
     public LineRenderer lineRenderer;
     private List<Vector3> linePositions = new List<Vector3>();
 
+    [Header("Cookie Settings")]
+    public GameObject cookie;
+    public GameObject brokenCookiePrefab;
+
     private Camera mainCamera;
     private bool isDrawing = false;
     private bool gameOver = false;
@@ -153,6 +157,15 @@ public class LineTracerManager : MonoBehaviour
         {
             lineRenderer.positionCount = 0;
             linePositions.Clear();
+        }
+
+        if (cookie != null && brokenCookiePrefab != null)
+        {
+            Vector3 pos = cookie.transform.position;
+            Quaternion rot = cookie.transform.rotation;
+
+            Destroy(cookie);
+            Instantiate(brokenCookiePrefab, pos, rot);
         }
     }
 }
