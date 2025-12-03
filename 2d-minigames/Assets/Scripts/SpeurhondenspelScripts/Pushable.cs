@@ -3,49 +3,67 @@ using UnityEngine;
 [RequireComponent(typeof(Rigidbody2D))]
 public class Pushable : MonoBehaviour
 {
-    public float pushSpeed = 5f;
+    public float moveSpeed = 5f;    
+    public float gridSize = 1f;      
+
+    private Vector2 targetPos;
+    private bool isMoving = false;
     private Rigidbody2D rb;
 
-    private Vector2 pushDirection = Vector2.zero;
+    private static Collider2D[] hitBuffer = new Collider2D[5]; 
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        rb.bodyType = RigidbodyType2D.Kinematic;
         rb.gravityScale = 0;
-        rb.freezeRotation = true;
+        rb.angularVelocity = 0;
 
-        rb.linearDamping = 20f;
-        rb.angularDamping = 0f;
+        targetPos = transform.position;
     }
 
     private void FixedUpdate()
     {
-        if (pushDirection != Vector2.zero)
-        {
-            Vector2 axisDir = Mathf.Abs(pushDirection.x) > Mathf.Abs(pushDirection.y)
-                ? new Vector2(Mathf.Sign(pushDirection.x), 0)
-                : new Vector2(0, Mathf.Sign(pushDirection.y));
+        if (!isMoving) return;
 
-            rb.linearVelocity = axisDir * pushSpeed;
-        }
-        else
+        rb.position = Vector2.MoveTowards(rb.position, targetPos, moveSpeed * Time.fixedDeltaTime);
+
+        if (Vector2.Distance(rb.position, targetPos) < 0.01f)
         {
-            rb.linearVelocity = Vector2.zero;
+            rb.position = targetPos;
+            isMoving = false;
         }
-        pushDirection = Vector2.zero;
     }
-
-    public void Push(Vector2 direction)
+    public bool TryPush(Vector2 dir)
     {
-        pushDirection = direction;
-    }
+        if (isMoving) return false;
 
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (collision.gameObject.CompareTag("BreakableWall"))
+        Vector2 newPos = (Vector2)transform.position + dir * gridSize;
+
+        int numHits = Physics2D.OverlapBoxNonAlloc(newPos, Vector2.one * 0.8f, 0f, hitBuffer);
+        for (int i = 0; i < numHits; i++)
         {
-            Destroy(collision.gameObject);
-        }
-    }
+            Collider2D hit = hitBuffer[i];
 
+            if (hit == null || hit.gameObject == gameObject) continue;
+
+            if (hit.CompareTag("BreakableWall"))
+            {
+                Destroy(hit.gameObject);
+            }
+            else if (hit.CompareTag("Pushable"))
+            {
+                Pushable otherPush = hit.GetComponent<Pushable>();
+                if (!otherPush.TryPush(dir)) return false;
+            }
+            else
+            {
+                return false; 
+            }
+        }
+
+        targetPos = newPos;
+        isMoving = true;
+        return true;
+    }
 }
