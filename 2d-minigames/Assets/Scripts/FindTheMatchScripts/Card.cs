@@ -14,6 +14,8 @@ public class Card : MonoBehaviour
 
 	private GameManager gameManager;
 
+	public bool isBadCard = false;
+
 	void Start()
 	{
 		gameManager = FindObjectOfType<GameManager>();

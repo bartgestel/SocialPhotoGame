@@ -5,13 +5,23 @@ using System.Collections;
 
 public class GameManager : MonoBehaviour
 {
-	public GameObject cardPrefab;          // Card prefab with Card.cs
-	public Transform cardParent;           // A grid layout group
-	public List<Sprite> cardSprites;       // Sprites in pairs
+	public GameObject cardPrefab;
+	public Transform cardParent;
+	public List<Sprite> cardSprites;       // normal sprites (each appears once)
+
+	public Sprite badCardSprite;           // Sprite for bad cards (same image for both)
 
 	private Card firstCard, secondCard;
 	private bool canFlip = true;
+
+	public AudioSource audioSource;
+	public AudioClip flipSound;
+	public AudioClip matchSound;
+	public AudioClip winSound;
+	public AudioClip loseSound;
+
 	private int matchedPairs = 0;
+	private int totalPairs;
 
 	void Start()
 	{
@@ -25,15 +35,22 @@ public class GameManager : MonoBehaviour
 
 	void CreateBoard()
 	{
-		// Duplicate sprites to make pairs
 		List<Sprite> fullDeck = new List<Sprite>();
+
+		// NORMAL CARD PAIRS
 		for (int i = 0; i < cardSprites.Count; i++)
 		{
 			fullDeck.Add(cardSprites[i]);
-			fullDeck.Add(cardSprites[i]);     // Add pair
+			fullDeck.Add(cardSprites[i]);
 		}
 
-		// Shuffle (Fisher-Yates)
+		totalPairs = cardSprites.Count; // used for win detection
+
+		// BAD CARD PAIR (2 cards)
+		fullDeck.Add(badCardSprite);
+		fullDeck.Add(badCardSprite);
+
+		// SHUFFLE DECK
 		for (int i = 0; i < fullDeck.Count; i++)
 		{
 			Sprite temp = fullDeck[i];
@@ -42,19 +59,30 @@ public class GameManager : MonoBehaviour
 			fullDeck[rand] = temp;
 		}
 
-		// Create card objects
+		// CREATE CARDS
 		for (int i = 0; i < fullDeck.Count; i++)
 		{
 			GameObject obj = Instantiate(cardPrefab, cardParent);
 			Card card = obj.GetComponent<Card>();
 
-			card.id = i / 2;                    // Matching ID
+			// Assign front sprite
 			card.frontSprite = fullDeck[i];
+
+			// Detect if this is a bad card
+			if (fullDeck[i] == badCardSprite)
+			{
+				card.isBadCard = true;
+			}
+
+			card.id = i / 2;
 		}
 	}
 
 	public void CardFlipped(Card card)
 	{
+		if (flipSound != null)
+			audioSource.PlayOneShot(flipSound);
+
 		if (firstCard == null)
 		{
 			firstCard = card;
@@ -72,13 +100,27 @@ public class GameManager : MonoBehaviour
 
 		yield return new WaitForSeconds(0.7f);
 
+		// BAD CARD CHECK
+		if (firstCard.isBadCard && secondCard.isBadCard)
+		{
+			Debug.Log("BAD CARDS MATCHED — YOU LOSE");
+
+			if (loseSound != null)
+				audioSource.PlayOneShot(loseSound);
+
+			yield break;
+		}
+
+		// NORMAL MATCH CHECK
 		if (firstCard.frontSprite == secondCard.frontSprite)
 		{
 			firstCard.SetMatched();
 			secondCard.SetMatched();
 
-			matchedPairs++;
+			if (matchSound != null)
+				audioSource.PlayOneShot(matchSound);
 
+			matchedPairs++;
 			CheckIfGameComplete();
 		}
 		else
@@ -91,17 +133,21 @@ public class GameManager : MonoBehaviour
 		secondCard = null;
 		canFlip = true;
 	}
+
 	private void CheckIfGameComplete()
 	{
-		int totalPairs = cardSprites.Count;
-
 		if (matchedPairs >= totalPairs)
 		{
-			Debug.Log("You WIn1");
+			Debug.Log("Yyo Win1");
+			
 			//if (GameCoordinatorScript.Instance != null)
 			//{
 			//	GameCoordinatorScript.Instance.TriggerWin();
 			//}
+
+			if (winSound != null)
+				audioSource.PlayOneShot(winSound);
 		}
 	}
 }
+
