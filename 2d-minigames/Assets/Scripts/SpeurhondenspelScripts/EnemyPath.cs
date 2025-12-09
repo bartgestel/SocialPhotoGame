@@ -8,7 +8,6 @@ public class EnemyPath : MonoBehaviour
     public float speed = 2f;
 
     private int index = 0;
-    private int direction = 1;
 
     private Animator animator;
     private SpriteRenderer spriteRenderer;
@@ -31,18 +30,20 @@ public class EnemyPath : MonoBehaviour
         Vector2 moveDir = target - current;
 
         if (moveDir.x < 0)
-            spriteRenderer.flipX = true;    
+            spriteRenderer.flipX = true;
         else if (moveDir.x > 0)
-            spriteRenderer.flipX = false;  
+            spriteRenderer.flipX = false;
 
         transform.position = Vector2.MoveTowards(current, target, speed * Time.deltaTime);
 
         if (Vector2.Distance(current, target) < 0.1f)
         {
-            index += direction;
+            index++;
 
-            if (index >= waypoints.Length - 1 || index <= 0)
-                direction *= -1;
+            if (index >= waypoints.Length)
+            {
+                index = 0;
+            }
         }
     }
 }
