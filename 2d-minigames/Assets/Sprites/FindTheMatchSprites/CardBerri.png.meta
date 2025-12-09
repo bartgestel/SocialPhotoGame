@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: b3d308e574eb7a2458e79be2275e6bf7
+guid: 0c277aa3c7bc8ae44bdbffdce9901e25
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -3277989119616714095
-    second: CardTomat_0
+      213: -3022031813660989480
+    second: CardBerri_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -100,7 +100,7 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: CardTomat_0
+      name: CardBerri_0
       rect:
         serializedVersion: 2
         x: 6
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 19a76a3634e3282d0800000000000000
-      internalID: -3277989119616714095
+      spriteID: 8d7aecea3169f06d0800000000000000
+      internalID: -3022031813660989480
       vertices: []
       indices: 
       edges: []
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      CardTomat_0: -3277989119616714095
+      CardBerri_0: -3022031813660989480
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
