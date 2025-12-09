@@ -14,14 +14,18 @@ public class PlayerController : MonoBehaviour
     public InputActionAsset inputActions;
     private InputAction moveAction;
 
-    private static Collider2D[] hitBuffer = new Collider2D[5]; // NonAlloc buffer
+    private Animator animator;
+    private SpriteRenderer spriteRenderer;
+
+    private static Collider2D[] hitBuffer = new Collider2D[5];
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         rb.bodyType = RigidbodyType2D.Kinematic;
-        rb.gravityScale = 0;
-        rb.angularVelocity = 0;
+
+        animator = GetComponent<Animator>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
 
         moveAction = inputActions.FindActionMap("Player").FindAction("Move");
         targetPos = rb.position;
@@ -32,7 +36,11 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        if (isMoving) return;
+        if (isMoving)
+        {
+            animator.speed = 1f;
+            return;
+        }
 
         Vector2 input = moveAction.ReadValue<Vector2>();
 
@@ -41,8 +49,17 @@ public class PlayerController : MonoBehaviour
         else if (input != Vector2.zero)
             input = new Vector2(0, Mathf.Sign(input.y));
         else
+        {
+            animator.speed = 0f; 
             return;
+        }
 
+        if (input.x < 0)
+            spriteRenderer.flipX = true;
+        else if (input.x > 0)
+            spriteRenderer.flipX = false;
+
+        animator.speed = 1f;
         TryMove(input);
     }
 
@@ -50,23 +67,17 @@ public class PlayerController : MonoBehaviour
     {
         Vector2 newPos = rb.position + dir * gridSize;
 
-        int numHits = Physics2D.OverlapBoxNonAlloc(newPos, Vector2.one * 0.8f, 0f, hitBuffer);
-        for (int i = 0; i < numHits; i++)
+        int count = Physics2D.OverlapBoxNonAlloc(newPos, Vector2.one * 0.8f, 0f, hitBuffer);
+        for (int i = 0; i < count; i++)
         {
             Collider2D hit = hitBuffer[i];
+            if (hit == null || hit.gameObject == gameObject) continue;
             if (hit.isTrigger) continue;
 
-            if (hit == null || hit.gameObject == gameObject) continue;
+            if (!hit.CompareTag("Pushable")) return;
 
-            if (hit.CompareTag("Pushable"))
-            {
-                Pushable pushable = hit.GetComponent<Pushable>();
-                if (!pushable.TryPush(dir)) return; 
-            }
-            else
-            {
-                return; 
-            }
+            Pushable p = hit.GetComponent<Pushable>();
+            if (!p.TryPush(dir)) return;
         }
 
         targetPos = newPos;
@@ -83,6 +94,7 @@ public class PlayerController : MonoBehaviour
         {
             rb.position = targetPos;
             isMoving = false;
+            animator.speed = 0f; 
         }
     }
 }
