@@ -247,6 +247,8 @@ MonoBehaviour:
   - {fileID: -3022031813660989480, guid: 0c277aa3c7bc8ae44bdbffdce9901e25, type: 3}
   - {fileID: 6122951203603393737, guid: 5e50304446825294ab8ce91566308dea, type: 3}
   badCardSprite: {fileID: -5087512607957746697, guid: ebe0065d3d4ac8541a4e040db303b728, type: 3}
+  puzzleGridSize: 3
+  maxPiecesToUse: 8
   audioSource: {fileID: 608726815}
   flipSound: {fileID: 0}
   matchSound: {fileID: 0}

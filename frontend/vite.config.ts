@@ -15,12 +15,11 @@ export default defineConfig({
         target: 'http://localhost:3000',
         changeOrigin: true,
         secure: false,
-      },
-      '/game': {
-        target: 'http://localhost:3000',
-        changeOrigin: true,
-        secure: false,
       }
     }
+  },
+  assetsInclude: ['**/*.wasm', '**/*.data'],
+  build: {
+    assetsInlineLimit: 0,
   }
 })

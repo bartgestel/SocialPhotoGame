@@ -6,7 +6,8 @@ import {
     uploadPicture, 
     getPictureByToken, 
     getPictureMedia, 
-    getMyPictures 
+    getMyPictures,
+    getPicturePieces
 } from "../controllers/pictureController.js";
 import { requireAuth } from "../middleware/requireAuth.js";
 
@@ -50,5 +51,8 @@ router.get("/token/:shareToken", getPictureByToken);
 
 // Get picture media file (public, but checks unlock status)
 router.get("/:pictureId/media/:anonymousId", getPictureMedia);
+
+// Get all picture pieces (public)
+router.get("/:pictureId/pieces", getPicturePieces);
 
 export default router;

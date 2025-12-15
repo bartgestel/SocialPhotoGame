@@ -5,6 +5,7 @@ import Home from "./pages/Home";
 import Game from "./pages/Game";
 import UploadPicture from "./pages/UploadPicture";
 import UnlockPicture from "./pages/UnlockPicture";
+import PuzzleTest from "./pages/PuzzleTest";
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
       <Route path="/game" element={<Game />} />
       <Route path="/upload" element={<UploadPicture />} />
       <Route path="/unlock/:shareToken" element={<UnlockPicture />} />
+      <Route path="/puzzle-test" element={<PuzzleTest />} />
     </Routes>
   );
 }
