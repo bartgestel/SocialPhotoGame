@@ -38,9 +38,9 @@ export default function Home() {
       {/* Mobile Layout */}
       <div className="lg:hidden flex flex-col h-screen">
         {/* Mobile Header */}
-        <header className="bg-primary text-white px-4 py-3 flex items-center justify-between">
+        <header className="text-secondary px-4 py-3 pt-8 flex items-center justify-between">
           <div className="w-8"></div>
-          <h1 className="text-lg font-semibold">What's new</h1>
+          <h1 className="text-3xl text-secondary font-semibold">What's new</h1>
           <div className="w-8"></div>
         </header>
 
@@ -57,14 +57,14 @@ export default function Home() {
           </div>
 
           {/* New Games Available Card */}
-          <div className="bg-actionButton text-white rounded-2xl p-6 flex items-center justify-between min-h-[100px] relative overflow-hidden">
+          <div className="bg-actionButton text-white rounded-2xl p-6 flex items-center justify-between min-h-[100px] relative overflow-hidden drop-shadow-md">
             <span className="text-lg font-medium z-10">New Games Available</span>
             <div className="absolute right-4 bottom-4">
               <div className="w-20 h-20 bg-black/30 rounded-full"></div>
               <div className="absolute top-4 right-12 w-12 h-12 bg-black/20 rounded-full"></div>
             </div>
           </div>
-
+          <div className="divider border-t border-secondary w-full my-4 pt-4"></div>
           {/* No New Comments Card */}
           <div className="bg-gray-400 text-white rounded-2xl p-5 text-center">
             <span className="text-base">No new comments</span>
@@ -80,17 +80,17 @@ export default function Home() {
           </div>
 
           {/* Friend Requests - Mobile */}
-          <div className="bg-purple-500 text-white rounded-2xl p-4">
+          {/* <div className="bg-purple-500 text-white rounded-2xl p-4">
             <h3 className="text-sm font-semibold mb-2">Friend Requests</h3>
             <FriendRequests />
-          </div>
+          </div> */}
         </main>
 
         {/* Mobile Bottom Navigation */}
         <nav className="fixed bottom-0 left-0 right-0 bg-primary text-white flex items-center justify-around py-4 px-6 shadow-lg">
           <button
             onClick={() => setActiveTab("home")}
-            className={`p-2 ${activeTab === "home" ? "opacity-100" : "opacity-60"}`}
+            className={`p-2 ${activeTab === "home" ? "bg-secondary text-white rounded-full" : "bg-transparent"}`}
           >
             <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
               <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
@@ -111,7 +111,7 @@ export default function Home() {
           </button>
           <button
             onClick={() => setActiveTab("profile")}
-            className={`p-2 ${activeTab === "profile" ? "opacity-100" : "opacity-60"}`}
+            className={`p-2 ${activeTab === "profile" ? "opacity-100": "bg-transparent"}`}
           >
             <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
