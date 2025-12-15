@@ -15,6 +15,20 @@
       "when": 1764320686808,
       "tag": "0001_grey_franklin_storm",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1765802294909,
+      "tag": "0002_white_power_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1765803058467,
+      "tag": "0003_spooky_shaman",
+      "breakpoints": true
     }
   ]
 }

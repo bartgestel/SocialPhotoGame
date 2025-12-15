@@ -10,6 +10,7 @@ import friendRoute from './routes/friendRoute.js';
 import userRoute from './routes/userRoute.js';
 import gameRoute from './routes/gameRoute.js';
 import pictureRoute from './routes/pictureRoute.js';
+import commentRoute from './routes/commentRoute.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -62,6 +63,8 @@ app.use('/api/users', userRoute);
 app.use('/api/games', gameRoute);
 
 app.use('/api/pictures', pictureRoute);
+
+app.use('/api/comments', commentRoute);
 
 async function start() {
     try {
