@@ -33,24 +33,24 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-white shadow-sm">
+      <header className="bg-background shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-primary">
             Social Photo Game
           </h1>
           <div className="flex items-center gap-4">
             <button
               onClick={() => navigate("/upload")}
-              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors"
+              className="bg-actionButton text-textActionButton px-4 py-2 rounded-md hover:opacity-90 transition-opacity"
             >
               📷 Upload Picture
             </button>
-            <span className="text-gray-700">Welcome, {session.user.name}!</span>
+            <span className="text-textPrimary">Welcome, {session.user.name}!</span>
             <button
               onClick={handleSignOut}
-              className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors"
+              className="bg-secondary text-textActionButton px-4 py-2 rounded-md hover:opacity-90 transition-opacity"
             >
               Sign Out
             </button>
@@ -62,20 +62,20 @@ export default function Home() {
       <main className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Search Users Section */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold mb-4">Find Friends</h2>
+          <div className="bg-tertiary rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-semibold mb-4 text-textPrimary">Find Friends</h2>
             <UserSearch currentUserId={session.user.id} />
           </div>
 
           {/* Friend Requests Section */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold mb-4">Friend Requests</h2>
+          <div className="bg-tertiary rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-semibold mb-4 text-textPrimary">Friend Requests</h2>
             <FriendRequests />
           </div>
 
           {/* Friends List Section */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold mb-4">My Friends</h2>
+          <div className="bg-tertiary rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-semibold mb-4 text-textPrimary">My Friends</h2>
             <FriendsList currentUserId={session.user.id} />
           </div>
         </div>
