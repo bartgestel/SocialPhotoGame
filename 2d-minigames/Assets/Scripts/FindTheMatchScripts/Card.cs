@@ -10,7 +10,7 @@ public class Card : MonoBehaviour
 	public Sprite backSprite;
 
 	private bool isFlipped = false;
-	private bool isMatched = false;
+	public bool isMatched = false;
 
 	private GameManager gameManager;
 
