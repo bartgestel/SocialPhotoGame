@@ -6,7 +6,8 @@ public class KillPlayer : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            Destroy(other.gameObject);   // Remove player from scene
+            Destroy(other.gameObject);
+            SpeurhondenManager.Instance.PlayerDied();
             Debug.Log("Player died!");
         }
     }
