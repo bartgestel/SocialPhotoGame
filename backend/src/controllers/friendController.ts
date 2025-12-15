@@ -12,7 +12,7 @@ export const addFriend = async (req: Request, res: Response) => {
         return res.status(401).json({ error: "Unauthorized" });
     }
 
-    try{
+    try {
         // Check if the friendship already exists (in either direction)
         const existingFriendship = await db.select({
             friendshipId: friendships.friendshipId,
@@ -26,9 +26,9 @@ export const addFriend = async (req: Request, res: Response) => {
             )
         ).limit(1);
 
-        if(existingFriendship.length > 0){
-            if(existingFriendship[0].status == "PENDING"){
-                await db.update(friendships).set({status: 'ACCEPTED'}).where(
+        if (existingFriendship.length > 0) {
+            if (existingFriendship[0].status == "PENDING") {
+                await db.update(friendships).set({ status: 'ACCEPTED' }).where(
                     eq(friendships.friendshipId, existingFriendship[0].friendshipId),
                 );
 
@@ -46,7 +46,7 @@ export const addFriend = async (req: Request, res: Response) => {
         });
 
         res.status(201).json({ message: "Friend request sent successfully" });
-    }catch (error) {
+    } catch (error) {
         console.error("Error adding friend:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
@@ -55,7 +55,7 @@ export const addFriend = async (req: Request, res: Response) => {
 export const getFriends = async (req: Request, res: Response) => {
     const userId = req.user?.id;
 
-    try{
+    try {
         const friends = await db.select({
             friendshipId: friendships.friendshipId,
             requesterId: friendships.requesterId,
@@ -70,10 +70,10 @@ export const getFriends = async (req: Request, res: Response) => {
                 eq(friendships.status, 'ACCEPTED'
                 )
             )
-        );
+        ).limit(500);  // Prevent unbounded result sets
 
         res.status(200).json({ friends });
-    }catch (error) {
+    } catch (error) {
         console.error("Error retrieving friends:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
@@ -82,7 +82,7 @@ export const getFriends = async (req: Request, res: Response) => {
 export const getFriendRequests = async (req: Request, res: Response) => {
     const userId = req.user?.id;
 
-    try{
+    try {
         const requests = await db.select({
             friendshipId: friendships.friendshipId,
             requesterId: friendships.requesterId,
@@ -96,7 +96,7 @@ export const getFriendRequests = async (req: Request, res: Response) => {
         );
 
         res.status(200).json({ requests });
-    }catch (error) {
+    } catch (error) {
         console.error("Error retrieving friend requests:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
@@ -106,7 +106,7 @@ export const respondToFriendRequest = async (req: Request, res: Response) => {
     const { friendshipId, accept } = req.body;
     const userId = req.user?.id;
 
-    try{
+    try {
         const friendship = await db.select().from(friendships).where(
             and(
                 eq(friendships.friendshipId, friendshipId),
@@ -115,12 +115,12 @@ export const respondToFriendRequest = async (req: Request, res: Response) => {
             )
         ).limit(1);
 
-        if(friendship.length === 0){
+        if (friendship.length === 0) {
             return res.status(404).json({ error: "Friend request not found" });
         }
 
-        if(accept){
-            await db.update(friendships).set({status: 'ACCEPTED'}).where(
+        if (accept) {
+            await db.update(friendships).set({ status: 'ACCEPTED' }).where(
                 eq(friendships.friendshipId, friendshipId),
             );
             return res.status(200).json({ message: "Friend request accepted" });
@@ -130,7 +130,7 @@ export const respondToFriendRequest = async (req: Request, res: Response) => {
             );
             return res.status(200).json({ message: "Friend request declined" });
         }
-    }catch (error) {
+    } catch (error) {
         console.error("Error responding to friend request:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }

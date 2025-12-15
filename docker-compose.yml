@@ -12,6 +12,14 @@ services:
     ports:
       - "5432:5432"
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1.0'
+        reservations:
+          memory: 256M
+          cpus: '0.5'
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d socialphotogame"]
       interval: 10s
@@ -32,6 +40,7 @@ services:
       GAME_SECRET_KEY: ${GAME_SECRET_KEY}
       NODE_ENV: production
       PORT: 3000
+      NODE_OPTIONS: "--max-old-space-size=384"
     volumes:
       - ./backend/uploads:/app/uploads
       - ./Build:/app/unity-games:ro
@@ -41,6 +50,14 @@ services:
       postgres:
         condition: service_healthy
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '1.0'
+        reservations:
+          memory: 256M
+          cpus: '0.5'
 
   frontend:
     build:
@@ -54,6 +71,14 @@ services:
     depends_on:
       - backend
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+        reservations:
+          memory: 128M
+          cpus: '0.25'
 
   caddy:
     image: caddy:2-alpine
@@ -70,6 +95,14 @@ services:
       - frontend
       - backend
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+          cpus: '0.5'
+        reservations:
+          memory: 128M
+          cpus: '0.25'
 
 volumes:
   postgres_data:

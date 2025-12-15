@@ -11,6 +11,7 @@ CONTAINER_NAME="socialphotogame-db"
 DB_NAME="socialphotogame"
 DB_USER="postgres"
 DB_PORT="5432"
+DB_PASSWORD="password"
 
 echo -e "${BLUE}=== Database Setup ===${NC}\n"
 
