@@ -7,6 +7,8 @@ TagManager:
   - BreakableWall
   - PipeTrigger
   - Pushable
+  - Enemy
+  - Border
   layers:
   - Default
   - TransparentFX
@@ -19,7 +21,7 @@ TagManager:
   - Snappable
   - PipeTrigger
   - UnBreakable
-  - 
+  - Field
   - 
   - 
   - 
