@@ -4,6 +4,8 @@ import { authClient } from "../lib/auth-client";
 import UserSearch from "../components/UserSearch";
 import FriendsList from "../components/FriendsList";
 import FriendRequests from "../components/FriendRequests";
+import pBlobCut from "../assets/app_assets/p_blob_cut.svg";
+import gBlobCut from "../assets/app_assets/g_blob_cut.svg";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -40,7 +42,7 @@ export default function Home() {
         {/* Mobile Header */}
         <header className="text-secondary px-4 py-3 pt-14 flex items-center justify-between">
           <div className="w-8"></div>
-          <h1 className="text-3xl text-secondary">What's new</h1>
+          <h1 className="text-3xl text-secondary font-medium">What's new</h1>
           <div className="w-8"></div>
         </header>
         
@@ -48,7 +50,7 @@ export default function Home() {
           {/* Mobile Content - Scrollable Feed */}
           <main className="flex-1 overflow-y-auto px-4 py-6 pb-20 space-y-4">
            
-         <div className="border-t border-primary w-full"></div>
+         <div className="border-t border-primary -mt-6 mb-10 w-full"></div>
           {/* New Photo Filters Card */}
           {/* <div className="bg-purple-600 text-white rounded-2xl p-6 flex items-center justify-between min-h-[100px] relative overflow-hidden">
             <span className="text-lg font-medium z-10">New Photo Filters</span>
@@ -58,23 +60,22 @@ export default function Home() {
               <div className="absolute -top-4 -right-4 w-20 h-20 bg-white/30 rounded-full"></div>
             </div>
           </div> */}
-           <div className="bg-purple-600 text-white rounded-2xl p-6 flex items-center justify-between min-h-[100px] relative overflow-hidden">
-            <span className="text-lg font-medium z-10">New Photo Filters</span>
-            <div className="absolute right-4 top-4">
-              <div className=""><img src="./app_assets/p_blob_cut.png" alt="New Photo Filters" className="w-16 h-16" /></div>
-            </div>
-          </div>
+              <div className="bg-[#5C4890] text-white rounded-2xl p-6 flex items-center justify-between min-h-[100px] relative overflow-hidden shadow-card">
+               <span className="text-lg font-medium z-10 self-end -mb-2">New Photo Filters</span>
+              <div className="absolute -right-3 -top-5">
+                <img src={pBlobCut} alt="New Photo Filters" className="w-36 h-36" />
+              </div>
+             </div>
 
           {/* New Games Available Card */}
-          <div className="bg-actionButton text-white rounded-2xl p-6 flex items-center justify-between min-h-[100px] relative overflow-hidden drop-shadow-md">
-            <span className="text-lg font-medium z-10">New Games Available</span>
-            <div className="absolute right-4 bottom-4">
-              <div className="w-20 h-20 bg-black/30 rounded-full"></div>
-              <div className="absolute top-4 right-12 w-12 h-12 bg-black/20 rounded-full"></div>
+            <div className="bg-actionButton text-white rounded-2xl p-6 flex items-center justify-between min-h-[100px] relative overflow-hidden shadow-card">
+            <span className="text-lg font-medium z-10 self-end -mb-2">New Games Available</span>
+            <div className="absolute -right-3 -top-5">
+              <img src={gBlobCut} alt="New Games Available" className="w-36 h-36" />
             </div>
           </div>
 
-          <div className="border-t border-primary w-full"></div>
+          <div className="border-t border-primary  w-full mt-10 mb-10"></div>
 
           {/* No New Comments Card */}
           <div className="bg-gray-400 text-white rounded-2xl p-5 text-center">
@@ -98,7 +99,7 @@ export default function Home() {
         </main>
 
         {/* Mobile Bottom Navigation */}
-        <nav className="fixed bottom-0 left-0 right-0 bg-primary text-white flex items-center justify-around py-4 px-6 shadow-lg">
+        <nav className="fixed bottom-0 left-0 right-0 bg-primary text-white flex items-center justify-around py-4 px-6 shadow-2xl drop-shadow-2xl">
           <button
             onClick={() => setActiveTab("home")}
             className={`p-2 ${activeTab === "home" ? "bg-secondary text-white rounded-full" : "bg-transparent"}`}

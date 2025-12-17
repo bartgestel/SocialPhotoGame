@@ -11,6 +11,12 @@
   --color-textActionButton: #FFFFFF;
 }
 
+@layer utilities {
+  .shadow-card {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.1);
+  }
+}
+
 :root {
   font-family: 'Poppins', sans-serif;
   line-height: 1.5;
