@@ -38,21 +38,30 @@ export default function Home() {
       {/* Mobile Layout */}
       <div className="lg:hidden flex flex-col h-screen">
         {/* Mobile Header */}
-        <header className="text-secondary px-4 py-3 pt-8 flex items-center justify-between">
+        <header className="text-secondary px-4 py-3 pt-14 flex items-center justify-between">
           <div className="w-8"></div>
-          <h1 className="text-3xl text-secondary font-semibold">What's new</h1>
+          <h1 className="text-3xl text-secondary">What's new</h1>
           <div className="w-8"></div>
         </header>
+        
 
-        {/* Mobile Content - Scrollable Feed */}
-        <main className="flex-1 overflow-y-auto px-4 py-6 pb-20 space-y-4">
+          {/* Mobile Content - Scrollable Feed */}
+          <main className="flex-1 overflow-y-auto px-4 py-6 pb-20 space-y-4">
+           
+         <div className="border-t border-primary w-full"></div>
           {/* New Photo Filters Card */}
-          <div className="bg-purple-600 text-white rounded-2xl p-6 flex items-center justify-between min-h-[100px] relative overflow-hidden">
+          {/* <div className="bg-purple-600 text-white rounded-2xl p-6 flex items-center justify-between min-h-[100px] relative overflow-hidden">
             <span className="text-lg font-medium z-10">New Photo Filters</span>
             <div className="absolute right-4 top-4">
               <div className="w-16 h-16 bg-white/20 rounded-full"></div>
               <div className="absolute top-8 right-8 w-12 h-12 bg-purple-400/40 rounded-full"></div>
               <div className="absolute -top-4 -right-4 w-20 h-20 bg-white/30 rounded-full"></div>
+            </div>
+          </div> */}
+           <div className="bg-purple-600 text-white rounded-2xl p-6 flex items-center justify-between min-h-[100px] relative overflow-hidden">
+            <span className="text-lg font-medium z-10">New Photo Filters</span>
+            <div className="absolute right-4 top-4">
+              <div className=""><img src="./app_assets/p_blob_cut.png" alt="New Photo Filters" className="w-16 h-16" /></div>
             </div>
           </div>
 
@@ -64,7 +73,9 @@ export default function Home() {
               <div className="absolute top-4 right-12 w-12 h-12 bg-black/20 rounded-full"></div>
             </div>
           </div>
-          <div className="divider border-t border-secondary w-full my-4 pt-4"></div>
+
+          <div className="border-t border-primary w-full"></div>
+
           {/* No New Comments Card */}
           <div className="bg-gray-400 text-white rounded-2xl p-5 text-center">
             <span className="text-base">No new comments</span>
