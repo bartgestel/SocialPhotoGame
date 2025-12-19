@@ -132,7 +132,10 @@ export default function Home() {
             </div>
           </button>
           <button
-            onClick={() => setActiveTab("profile")}
+            onClick={() => {
+              setActiveTab("profile");
+              navigate("/profile");
+            }}
             className={`p-2 ${activeTab === "profile" }`}
           >
             <img 
@@ -157,7 +160,7 @@ export default function Home() {
           {/* Sidebar Content */}
           <div className="relative z-10 space-y-4">
             <button
-              onClick={() => navigate("/")}
+              onClick={() => navigate("/home")}
               className="w-full text-left px-4 py-3 rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow flex items-center gap-3"
             >
               <svg className="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 24 24">
