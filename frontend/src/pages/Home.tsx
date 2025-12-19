@@ -6,6 +6,11 @@ import FriendsList from "../components/FriendsList";
 import FriendRequests from "../components/FriendRequests";
 import pBlobCut from "../assets/app_assets/p_blob_cut.svg";
 import gBlobCut from "../assets/app_assets/g_blob_cut.svg";
+import HomeD from "../assets/app_assets/svg/Home_d.svg";
+import HomeL from "../assets/app_assets/svg/Home_L.svg";
+import PhotoL from "../assets/app_assets/svg/photo_L.svg";
+import ProfileD from "../assets/app_assets/svg/profile_D.svg";
+import ProfileL from "../assets/app_assets/svg/profile_L.svg";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -36,21 +41,22 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-tertiary">
+    <div className="min-h-screen bg-background">
       {/* Mobile Layout */}
       <div className="lg:hidden flex flex-col h-screen">
         {/* Mobile Header */}
-        <header className="text-secondary px-4 py-3 pt-14 flex items-center justify-between">
-          <div className="w-8"></div>
-          <h1 className="text-3xl text-secondary font-medium">What's new</h1>
-          <div className="w-8"></div>
+        <header className="text-secondary px-4 py-3 pt-14 flex flex-col">
+          <div className="flex items-center justify-between">
+            <div className="w-8"></div>
+            <h1 className="text-2xl text-secondary font-medium">What's new</h1>
+            <div className="w-8"></div>
+          </div>
+          <div className="border-t border-primary  w-full"></div>
         </header>
         
 
           {/* Mobile Content - Scrollable Feed */}
           <main className="flex-1 overflow-y-auto px-4 py-6 pb-20 space-y-4">
-           
-         <div className="border-t border-primary -mt-6 mb-10 w-full"></div>
           {/* New Photo Filters Card */}
           {/* <div className="bg-purple-600 text-white rounded-2xl p-6 flex items-center justify-between min-h-[100px] relative overflow-hidden">
             <span className="text-lg font-medium z-10">New Photo Filters</span>
@@ -61,7 +67,7 @@ export default function Home() {
             </div>
           </div> */}
               <div className="bg-[#5C4890] text-white rounded-2xl p-6 flex items-center justify-between min-h-[100px] relative overflow-hidden shadow-card">
-               <span className="text-lg font-medium z-10 self-end -mb-2">New Photo Filters</span>
+               <span className="text-base font-medium z-10 self-end -mb-2">New Photo Filters</span>
               <div className="absolute -right-3 -top-5">
                 <img src={pBlobCut} alt="New Photo Filters" className="w-36 h-36" />
               </div>
@@ -69,7 +75,7 @@ export default function Home() {
 
           {/* New Games Available Card */}
             <div className="bg-actionButton text-white rounded-2xl p-6 flex items-center justify-between min-h-[100px] relative overflow-hidden shadow-card">
-            <span className="text-lg font-medium z-10 self-end -mb-2">New Games Available</span>
+            <span className="text-base font-medium z-10 self-end -mb-2">New Games Available</span>
             <div className="absolute -right-3 -top-5">
               <img src={gBlobCut} alt="New Games Available" className="w-36 h-36" />
             </div>
@@ -78,16 +84,16 @@ export default function Home() {
           <div className="border-t border-primary  w-full mt-10 mb-10"></div>
 
           {/* No New Comments Card */}
-          <div className="bg-gray-400 text-white rounded-2xl p-5 text-center">
+          <div className="bg-[#808080] text-white rounded-2xl p-2 text-center shadow-card">
             <span className="text-base">No new comments</span>
           </div>
 
           {/* Notifications */}
-          <div className="bg-primary/80 text-white rounded-2xl p-4">
+          <div className="bg-primary text-white rounded-2xl p-2 shadow-card">
             <span className="text-sm">"New chair" has been revealed 20 times</span>
           </div>
 
-          <div className="bg-primary text-white rounded-2xl p-4">
+          <div className="bg-primary text-white rounded-2xl p-2 shadow-card">
             <span className="text-sm">"Gender reveal" has been revealed 45 times</span>
           </div>
 
@@ -102,11 +108,13 @@ export default function Home() {
         <nav className="fixed bottom-0 left-0 right-0 bg-primary text-white flex items-center justify-around py-4 px-6 shadow-2xl drop-shadow-2xl">
           <button
             onClick={() => setActiveTab("home")}
-            className={`p-2 ${activeTab === "home" ? "bg-secondary text-white rounded-full" : "bg-transparent"}`}
+            className={`p-2 ${activeTab === "home" }`}
           >
-            <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-            </svg>
+            <img 
+              src={activeTab === "home" ? HomeD : HomeL} 
+              alt="Home" 
+              className="w-8 h-8" 
+            />
           </button>
           <button
             onClick={() => {
@@ -115,19 +123,23 @@ export default function Home() {
             }}
             className="p-2"
           >
-            <div className="w-12 h-12 rounded-full border-3 border-white flex items-center justify-center">
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
+            <div className="w-12 h-12 flex items-center justify-center">
+              <img 
+                src={PhotoL} 
+                alt="Add Photo" 
+                className="w-10 h-10" 
+              />
             </div>
           </button>
           <button
             onClick={() => setActiveTab("profile")}
-            className={`p-2 ${activeTab === "profile" ? "opacity-100": "bg-transparent"}`}
+            className={`p-2 ${activeTab === "profile" }`}
           >
-            <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-            </svg>
+            <img 
+              src={activeTab === "profile" ? ProfileD : ProfileL} 
+              alt="Profile" 
+              className="w-10 h-10" 
+            />
           </button>
         </nav>
       </div>
