@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
+import envelopeIcon from "../assets/app_assets/envelope.svg";
 
 interface PictureInfo {
   pictureId: string;
@@ -36,8 +37,9 @@ export default function UnlockPicture() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [pictureInfo, setPictureInfo] = useState<PictureInfo | null>(null);
-  const [unlockedPicture] = useState<UnlockedPicture | null>(null);
+  const [unlockedPicture, setUnlockedPicture] = useState<UnlockedPicture | null>(null);
   const [anonymousId, setAnonymousId] = useState<string>("");
+  const [step, setStep] = useState<"landing" | "game" | "revealed">("landing");
 
   useEffect(() => {
     // Get or create anonymous ID from localStorage
@@ -65,16 +67,48 @@ export default function UnlockPicture() {
       const data = await api.getPictureByToken(shareToken);
       setPictureInfo(data);
     } catch (err: any) {
-      setError(err.message || "Failed to load picture");
+      // For development: Show mock data if picture not found
+      if (err.message.includes("Picture not found") || err.message.includes("404")) {
+        console.warn("Using mock data for development");
+        setPictureInfo({
+          pictureId: "mock-id",
+          requiredGameId: 1,
+          sender: {
+            id: "mock-sender",
+            name: "Test User",
+            username: "testuser",
+            image: null,
+          },
+          createdAt: new Date().toISOString(),
+          expiresAt: null,
+          maxUnlocks: 0,
+          currentUnlocks: 0,
+        });
+      } else {
+        setError(err.message || "Failed to load picture");
+      }
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleOpenEnvelope = () => {
+    setStep("game");
   };
 
   const handlePlayGame = () => {
     if (!pictureInfo || !shareToken) return;
     // Navigate to game page with shareToken
     navigate(`/game?shareToken=${shareToken}&anonymousId=${anonymousId}`);
+  };
+
+  const handleGameComplete = (pictureData: UnlockedPicture) => {
+    setUnlockedPicture(pictureData);
+    setStep("revealed");
+  };
+
+  const handleContinue = () => {
+    navigate("/home");
   };
 
   if (loading) {
@@ -112,117 +146,111 @@ export default function UnlockPicture() {
     );
   }
 
-  if (unlockedPicture) {
+  if (!pictureInfo) return null;
+
+  // Step 1: Landing Page with Envelope
+  if (step === "landing") {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-lg p-8 max-w-2xl w-full">
-          <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">
-              Picture Unlocked!
-            </h2>
-            <p className="mt-2 text-gray-600">
-              From {unlockedPicture.sender.name}
-              {unlockedPicture.sender.username &&
-                ` (@${unlockedPicture.sender.username})`}
-            </p>
-          </div>
+      <div className="min-h-screen bg-primary flex flex-col items-center justify-between p-8 pt-20 pb-12">
+        <div className="text-center text-white space-y-2 max-w-sm">
+          <p className="text-lg">Someone wanted to let you know of</p>
+          <p className="text-lg">something exciting!</p>
+        </div>
 
-          <div className="relative rounded-lg overflow-hidden bg-gray-100">
-            <img
-              src={unlockedPicture.mediaUrl}
-              alt="Unlocked picture"
-              className="w-full h-auto"
-            />
+        <div className="flex-1 flex items-center justify-center" onClick={handleOpenEnvelope}>
+          <div className="relative cursor-pointer transform hover:scale-105 transition-transform">
+            {/* Envelope */}
+            <div className="w-64 h-48 bg-white rounded-2xl shadow-2xl relative overflow-hidden">
+              {/* Envelope flap */}
+              <div className="absolute top-0 left-0 right-0 h-24 bg-tertiary transform origin-top"></div>
+              
+              {/* Open circle badge */}
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-secondary rounded-full flex items-center justify-center shadow-lg">
+                <span className="text-white text-sm font-medium">Open</span>
+              </div>
+            </div>
           </div>
+        </div>
 
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-500">
-              Shared on{" "}
-              {new Date(unlockedPicture.createdAt).toLocaleDateString()}
-            </p>
+        <div className="text-center text-white">
+          <p className="text-base">Tap to open</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Step 2: Game Playing Page
+  if (step === "game") {
+    return (
+      <div className="min-h-screen bg-primary flex items-center justify-center p-8">
+        <div className="w-full max-w-sm">
+          {/* Decorative circles pattern */}
+          <div className="relative w-full aspect-[9/16] bg-tertiary rounded-3xl overflow-hidden">
+            {/* Large circle bottom-left */}
+            <div className="absolute -left-20 bottom-0 w-48 h-48 bg-secondary rounded-full"></div>
+            
+            {/* Medium circle bottom-right */}
+            <div className="absolute -right-12 bottom-12 w-40 h-40 bg-primary rounded-full"></div>
+            
+            {/* Large circle top-right */}
+            <div className="absolute -right-16 -top-12 w-64 h-64 bg-secondary/80 rounded-full"></div>
+            
+            {/* Medium circle center */}
+            <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-secondary/70 rounded-full"></div>
+            
+            {/* Small circles */}
+            <div className="absolute left-12 top-24 w-16 h-16 bg-primary/60 rounded-full"></div>
+            <div className="absolute left-20 bottom-32 w-12 h-12 bg-primary/70 rounded-full"></div>
+            
+            {/* Play game button */}
+            <div className="absolute inset-0 flex items-center justify-center">
+              <button
+                onClick={handlePlayGame}
+                className="px-8 py-4 bg-actionButton text-white rounded-3xl font-medium shadow-lg hover:opacity-90 transition-opacity"
+              >
+                Play Game to Reveal
+              </button>
+            </div>
           </div>
         </div>
       </div>
     );
   }
 
-  if (!pictureInfo) return null;
-
-  return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full">
-        <div className="text-center">
-          <div className="mx-auto h-24 w-24 bg-blue-100 rounded-full flex items-center justify-center">
-            <svg
-              className="h-12 w-12 text-blue-600"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-              />
-            </svg>
-          </div>
-
-          <h1 className="mt-6 text-3xl font-bold text-gray-900">
-            Locked Picture
-          </h1>
-
-          <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-            <p className="text-sm text-gray-600 mb-2">From</p>
-            <div className="flex items-center justify-center gap-3">
-              {pictureInfo.sender.image && (
-                <img
-                  src={pictureInfo.sender.image}
-                  alt={pictureInfo.sender.name}
-                  className="h-10 w-10 rounded-full"
-                />
-              )}
-              <div className="text-left">
-                <p className="font-semibold text-gray-900">
-                  {pictureInfo.sender.name}
-                </p>
-                {pictureInfo.sender.username && (
-                  <p className="text-sm text-gray-500">
-                    @{pictureInfo.sender.username}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-6 space-y-2 text-sm text-gray-600">
-            <p>🎮 Play a game to unlock this picture</p>
-            {pictureInfo.maxUnlocks > 0 && (
-              <p>
-                {pictureInfo.currentUnlocks}/{pictureInfo.maxUnlocks} unlocks
-                used
-              </p>
-            )}
-            {pictureInfo.expiresAt && (
-              <p>
-                Expires{" "}
-                {new Date(pictureInfo.expiresAt).toLocaleDateString()}
-              </p>
-            )}
-          </div>
-
-          <button
-            onClick={handlePlayGame}
-            className="mt-8 w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold text-lg transition-colors"
-          >
-            Play Game to Unlock
-          </button>
-
-          <p className="mt-4 text-xs text-gray-500">
-            No account needed • Free to play
+  // Step 3: Revealed Picture Page
+  if (step === "revealed" && unlockedPicture) {
+    return (
+      <div className="min-h-screen bg-primary flex flex-col items-center justify-between p-8 pt-16 pb-8">
+        {/* Success Message */}
+        <div className="text-center text-white space-y-2 max-w-sm">
+          <p className="text-xl font-semibold">Great job!</p>
+          <p className="text-base">You've revealed the whole picture</p>
+          <p className="text-sm mt-4">
+            Tap to leave a comment and let "{unlockedPicture.sender.name}" know what you think!
           </p>
         </div>
+
+        {/* Picture Display */}
+        <div className="flex-1 flex items-center justify-center my-8">
+          <div className="w-full max-w-sm aspect-[3/4] bg-white rounded-3xl overflow-hidden shadow-2xl transform rotate-3 hover:rotate-0 transition-transform">
+            <img
+              src={unlockedPicture.mediaUrl}
+              alt="Revealed picture"
+              className="w-full h-full object-cover"
+            />
+          </div>
+        </div>
+
+        {/* Continue Button */}
+        <button
+          onClick={handleContinue}
+          className="w-full max-w-sm py-4 bg-secondary text-white rounded-3xl font-medium shadow-lg hover:opacity-90 transition-opacity"
+        >
+          Continue
+        </button>
       </div>
-    </div>
-  );
+    );
+  }
+
+  return null;
 }

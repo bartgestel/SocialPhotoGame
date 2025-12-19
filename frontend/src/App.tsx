@@ -18,6 +18,7 @@ export default function App() {
       <Route path="/game" element={<Game />} />
       <Route path="/upload" element={<UploadPicture />} />
       <Route path="/unlock/:shareToken" element={<UnlockPicture />} />
+      <Route path="/post/:shareToken" element={<UnlockPicture />} />
     </Routes>
   );
 }

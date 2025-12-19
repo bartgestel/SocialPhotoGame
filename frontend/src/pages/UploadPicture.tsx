@@ -61,11 +61,12 @@ export default function UploadPicture() {
 
   if (shareLink) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full">
-          <div className="text-center">
+      <div className="min-h-screen bg-primary flex flex-col items-center justify-between p-8 pt-20 pb-12">
+        {/* Success Message */}
+        <div className="text-center text-white space-y-3 max-w-sm">
+          <div className="flex justify-center mb-4">
             <svg
-              className="mx-auto h-12 w-12 text-green-500"
+              className="h-16 w-16 text-actionButton"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -73,53 +74,73 @@ export default function UploadPicture() {
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth={2}
+                strokeWidth={3}
                 d="M5 13l4 4L19 7"
               />
             </svg>
-            <h2 className="mt-4 text-2xl font-bold text-gray-900">
-              Picture Uploaded!
-            </h2>
-            <p className="mt-2 text-gray-600">
-              Share this link with anyone. They'll need to play the game to
-              unlock it.
-            </p>
           </div>
+          <h2 className="text-2xl font-semibold">Picture Uploaded!</h2>
+          <p className="text-base">Share this link with someone special</p>
+          <p className="text-sm opacity-90">They'll need to play the game to unlock it</p>
+        </div>
 
-          <div className="mt-6 bg-gray-50 rounded-lg p-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Share Link
+        {/* Envelope Visual */}
+        <div className="flex-1 flex items-center justify-center my-8">
+          <div className="relative transform hover:scale-105 transition-transform">
+            {/* Envelope */}
+            <div className="w-72 h-52 bg-white rounded-3xl shadow-2xl relative overflow-hidden">
+              {/* Envelope flap */}
+              <div className="absolute top-0 left-0 right-0 h-28 bg-tertiary rounded-t-3xl"></div>
+              
+              {/* Share icon badge */}
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-actionButton rounded-full flex items-center justify-center shadow-xl">
+                <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Share Link */}
+        <div className="w-full max-w-md space-y-4">
+          <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-4">
+            <label className="block text-sm font-medium text-white mb-2 opacity-90">
+              Your Share Link
             </label>
             <div className="flex gap-2">
               <input
                 type="text"
                 readOnly
                 value={shareLink}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm"
+                className="flex-1 px-4 py-3 bg-white rounded-xl border-none outline-none text-secondary text-sm"
               />
               <button
                 onClick={copyToClipboard}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-medium"
+                className="px-6 py-3 bg-actionButton text-white rounded-xl hover:opacity-90 transition-opacity font-medium"
               >
                 Copy
               </button>
             </div>
           </div>
 
-          <div className="mt-6 flex gap-3">
+          {/* Action Buttons */}
+          <div className="flex gap-3">
             <button
               onClick={() => {
                 setShareLink("");
                 setFile(null);
                 setPreview("");
+                setTitle("");
+                setDescription("");
               }}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 font-medium"
+              className="flex-1 px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl hover:bg-white/30 transition-colors font-medium"
             >
               Upload Another
             </button>
             <button
               onClick={() => navigate("/home")}
-              className="flex-1 px-4 py-2 bg-gray-900 text-white rounded-md hover:bg-gray-800 font-medium"
+              className="flex-1 px-6 py-3 bg-secondary text-white rounded-xl hover:opacity-90 transition-opacity font-medium"
             >
               Go Home
             </button>
