@@ -1,7 +1,9 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using TMPro;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
@@ -31,6 +33,12 @@ public class GameManager : MonoBehaviour
 
 	[Header("UI")]
 	public GameObject gameOverPanel;
+
+
+	[Header("Guess Limit")]
+	public int GuessLimit;
+	private int GuessProcess = 0;
+	[SerializeField] private TextMeshProUGUI GuessText;
 
 	void Start()
 	{
@@ -90,6 +98,10 @@ public class GameManager : MonoBehaviour
 
 			allCards.Add(card);
 		}
+		Canvas.ForceUpdateCanvases();
+		LayoutRebuilder.ForceRebuildLayoutImmediate(
+	cardParent as RectTransform
+);
 	}
 
 	public void CardFlipped(Card card)
@@ -174,13 +186,23 @@ public class GameManager : MonoBehaviour
 		firstCard = null;
 		secondCard = null;
 		canFlip = true;
+
+		if (matchedPairs <= totalPairs && !gameOver)
+		{
+			GuessProcess++;
+			GuessText.text = $"{GuessProcess} / {GuessLimit}";
+			if (GuessProcess >= GuessLimit)
+			{
+				GameOver();
+				yield break;
+			}
+		}
 	}
 
 	void GameOver()
 	{
 		gameOver = true;
 		canFlip = false;
-
 		if (loseSound != null)
 			audioSource.PlayOneShot(loseSound);
 
@@ -191,10 +213,12 @@ public class GameManager : MonoBehaviour
 	{
 		if (matchedPairs >= totalPairs)
 		{
-			Debug.Log("YOU WIN!");
+			gameOver = true;
+			canFlip = false;
 
 			if (winSound != null)
 				audioSource.PlayOneShot(winSound);
+			
 		}
 	}
 
