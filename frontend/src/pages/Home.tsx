@@ -147,7 +147,7 @@ export default function Home() {
       {/* Desktop Layout */}
       <div className="hidden lg:flex h-screen overflow-hidden bg-tertiary">
         {/* Left Sidebar */}
-        <aside className="w-96 bg-tertiary p-8 pl-32 flex flex-col relative">
+        <aside className="w-96 bg-tertiary p-8 pl-32 pt-36 ml-32 flex flex-col relative">
           {/* Decorative Circles - Bottom Left */}
           <div className="absolute left-0 bottom-20 w-48 h-48 bg-secondary rounded-full -translate-x-1/2"></div>
           <div className="absolute left-12 bottom-40 w-28 h-28 bg-primary rounded-full"></div>
@@ -188,14 +188,15 @@ export default function Home() {
         </aside>
 
         {/* Center Content */}
-        <main className="flex-1 bg-tertiary overflow-y-auto px-8 py-8 scrollbar-hide">
-          <div className="max-w-xl mx-auto">
-            <h1 className="text-3xl font-bold text-secondary mb-2">Your dashboard</h1>
-            
+        <div className="flex-1 flex flex-col overflow-hidden">
+          {/* Big Header at Top - Absolute Positioned Over Sidebar */}
+          <h1 className="absolute top-12 left-64 text-7xl text-secondary z-30">Your dashboard</h1>
+          
+          <main className="flex-1 bg-tertiary overflow-y-auto scrollbar-hide pt-48">
+            <div className="max-w-xl mx-auto px-8">
             {/* Tab Navigation */}
-            <div className="flex gap-8 mb-6 border-b border-secondary/20">
-              <button className="pb-2 text-sm text-secondary border-b-2 border-secondary">Recent posts</button>
-              <button className="pb-2 text-sm text-secondary/60 hover:text-secondary">What's new</button>
+            <div className="mb-6">
+              <h2 className="text-lg font-medium text-secondary pb-2 border-b border-secondary/40">Recent posts</h2>
             </div>
             
             {/* Post Card */}
@@ -226,18 +227,19 @@ export default function Home() {
               </button>
             </div>
           </div>
-        </main>
+          </main>
+        </div>
 
         {/* Right Sidebar */}
-        <aside className="w-80 bg-tertiary overflow-y-auto px-6 py-8 space-y-6 scrollbar-hide">
+        <aside className="w-80 bg-tertiary overflow-y-auto px-6 pt-48 pb-8 mr-32 space-y-6 scrollbar-hide">
           {/* What's New Section */}
           <div>
-            <h2 className="text-sm font-semibold text-secondary mb-3">What's new</h2>
-            <div className="space-y-2">
-              <div className="bg-[#5C4890] text-white rounded-2xl p-4 text-xs font-medium shadow-card min-h-[60px] flex items-center">
+            <h2 className="text-lg font-medium text-secondary pb-2 mb-6 border-b border-secondary/40">What's new</h2>
+            <div className="space-y-3">
+              <div className="bg-[#5C4890] text-white rounded-2xl px-4 py-6 text-sm font-medium shadow-card">
                 New Photo Filters
               </div>
-              <div className="bg-actionButton text-white rounded-2xl p-4 text-xs font-medium shadow-card min-h-[60px] flex items-center">
+              <div className="bg-actionButton text-white rounded-2xl px-4 py-6 text-sm font-medium shadow-card">
                 New Games Available
               </div>
             </div>
@@ -245,15 +247,15 @@ export default function Home() {
 
           {/* Notifications Section */}
           <div>
-            <h2 className="text-sm font-semibold text-secondary mb-3">Notifications</h2>
-            <div className="space-y-2">
-              <div className="bg-[#808080] text-white rounded-2xl px-4 py-3 text-center text-xs shadow-card">
+            <h2 className="text-lg font-medium text-secondary pb-2 mb-6 border-b border-secondary/40">Notifications</h2>
+            <div className="space-y-3">
+              <div className="bg-[#808080] text-white rounded-2xl px-4 py-4 text-center text-sm shadow-card">
                 No new comments
               </div>
-              <div className="bg-primary text-white rounded-2xl px-4 py-3 text-xs shadow-card">
+              <div className="bg-primary text-white rounded-2xl px-4 py-4 text-sm shadow-card">
                 "New chair" has been revealed 20 times
               </div>
-              <div className="bg-primary text-white rounded-2xl px-4 py-3 text-xs shadow-card">
+              <div className="bg-primary text-white rounded-2xl px-4 py-4 text-sm shadow-card">
                 "Gender reveal" has been revealed 45 times
               </div>
             </div>
