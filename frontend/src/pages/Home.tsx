@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { authClient } from "../lib/auth-client";
-import UserSearch from "../components/UserSearch";
-import FriendsList from "../components/FriendsList";
-import FriendRequests from "../components/FriendRequests";
 import pBlobCut from "../assets/app_assets/p_blob_cut.svg";
 import gBlobCut from "../assets/app_assets/g_blob_cut.svg";
 import HomeD from "../assets/app_assets/svg/Home_d.svg";
@@ -148,40 +145,42 @@ export default function Home() {
       </div>
 
       {/* Desktop Layout */}
-      <div className="hidden lg:flex h-screen overflow-hidden">
+      <div className="hidden lg:flex h-screen overflow-hidden bg-tertiary">
         {/* Left Sidebar */}
-        <aside className="w-64 bg-tertiary p-6 flex flex-col relative">
-          {/* Decorative Circles */}
-          <div className="absolute left-8 top-32 w-24 h-24 bg-primary rounded-full"></div>
-          <div className="absolute left-12 top-56 w-16 h-16 bg-primary/60 rounded-full"></div>
-          <div className="absolute left-4 bottom-32 w-32 h-32 bg-secondary rounded-full"></div>
-          <div className="absolute left-16 bottom-24 w-20 h-20 bg-primary/70 rounded-full"></div>
+        <aside className="w-96 bg-tertiary p-8 pl-32 flex flex-col relative">
+          {/* Decorative Circles - Bottom Left */}
+          <div className="absolute left-0 bottom-20 w-48 h-48 bg-secondary rounded-full -translate-x-1/2"></div>
+          <div className="absolute left-12 bottom-40 w-28 h-28 bg-primary rounded-full"></div>
+          <div className="absolute left-6 top-40 w-20 h-20 bg-primary/70 rounded-full"></div>
+          <div className="absolute left-16 top-56 w-12 h-12 bg-secondary/60 rounded-full"></div>
 
           {/* Sidebar Content */}
-          <div className="relative z-10 space-y-4">
-            <button
-              onClick={() => navigate("/home")}
-              className="w-full text-left px-4 py-3 rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow flex items-center gap-3"
-            >
-              <svg className="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
-              </svg>
-              <span className="font-medium text-secondary">Dashboard</span>
-            </button>
-            
-            <button
-              onClick={() => handleSignOut()}
-              className="w-full text-left px-4 py-3 rounded-lg bg-white shadow-sm hover:shadow-md transition-shadow flex items-center gap-3"
-            >
-              <svg className="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
-              </svg>
-              <span className="font-medium text-secondary">Settings</span>
-            </button>
+          <div className="relative z-10 space-y-3">
+            <div className="bg-white rounded-2xl p-4 shadow-md mt-26 space-y-2">
+              <button
+                onClick={() => navigate("/home")}
+                className="w-full text-left px-3 py-2 rounded-lg hover:bg-tertiary transition-colors flex items-center gap-3"
+              >
+                <svg className="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+                </svg>
+                <span className="text-sm text-secondary">Dashboard</span>
+              </button>
+              
+              <button
+                onClick={() => handleSignOut()}
+                className="w-full text-left px-3 py-2 rounded-lg hover:bg-tertiary transition-colors flex items-center gap-3"
+              >
+                <svg className="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
+                </svg>
+                <span className="text-sm text-secondary">Settings</span>
+              </button>
+            </div>
 
             <button
               onClick={() => navigate("/upload")}
-              className="w-full mt-6 px-4 py-3 rounded-lg bg-actionButton text-white font-medium hover:opacity-90 transition-opacity"
+              className="w-full px-4 py-3 rounded-xl bg-actionButton text-white text-sm font-medium hover:opacity-90 transition-opacity shadow-md"
             >
               Create post
             </button>
@@ -189,58 +188,56 @@ export default function Home() {
         </aside>
 
         {/* Center Content */}
-        <main className="flex-1 bg-tertiary overflow-y-auto">
-          <div className="max-w-4xl mx-auto p-8">
-            <h1 className="text-4xl font-bold text-secondary mb-8">Your dashboard</h1>
+        <main className="flex-1 bg-tertiary overflow-y-auto px-8 py-8 scrollbar-hide">
+          <div className="max-w-xl mx-auto">
+            <h1 className="text-3xl font-bold text-secondary mb-2">Your dashboard</h1>
             
-            <div className="bg-white rounded-2xl shadow-lg p-8">
-              <h2 className="text-2xl font-semibold text-secondary mb-6">Recent posts</h2>
-              
-              {/* Sample Post Card */}
-              <div className="bg-tertiary rounded-xl overflow-hidden">
-                <div className="aspect-[3/4] bg-gray-200 flex items-center justify-center">
-                  <svg className="w-24 h-24 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </div>
-                <div className="p-4 flex gap-4 justify-center">
-                  <button className="p-2 hover:bg-white/50 rounded-full">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                    </svg>
-                  </button>
-                  <button className="p-2 hover:bg-white/50 rounded-full">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                    </svg>
-                  </button>
-                  <button className="p-2 hover:bg-white/50 rounded-full">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                    </svg>
-                  </button>
-                </div>
+            {/* Tab Navigation */}
+            <div className="flex gap-8 mb-6 border-b border-secondary/20">
+              <button className="pb-2 text-sm text-secondary border-b-2 border-secondary">Recent posts</button>
+              <button className="pb-2 text-sm text-secondary/60 hover:text-secondary">What's new</button>
+            </div>
+            
+            {/* Post Card */}
+            <div className="bg-tertiary rounded-3xl overflow-hidden shadow-lg">
+              <div className="aspect-[3/4] bg-gradient-to-b from-tertiary to-white flex items-center justify-center">
+                <svg className="w-20 h-20 text-secondary/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
               </div>
+            </div>
 
-              {/* Friend Search */}
-              <div className="mt-8">
-                <h3 className="text-xl font-semibold text-secondary mb-4">Find Friends</h3>
-                <UserSearch currentUserId={session.user.id} />
-              </div>
+            {/* Action Buttons */}
+            <div className="flex gap-4 justify-center mt-4">
+              <button className="p-3 hover:bg-white/50 rounded-full transition-colors">
+                <svg className="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+              </button>
+              <button className="p-3 hover:bg-white/50 rounded-full transition-colors">
+                <svg className="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+              </button>
+              <button className="p-3 hover:bg-white/50 rounded-full transition-colors">
+                <svg className="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                </svg>
+              </button>
             </div>
           </div>
         </main>
 
         {/* Right Sidebar */}
-        <aside className="w-80 bg-tertiary overflow-y-auto p-6 space-y-6">
+        <aside className="w-80 bg-tertiary overflow-y-auto px-6 py-8 space-y-6 scrollbar-hide">
           {/* What's New Section */}
           <div>
-            <h2 className="text-xl font-semibold text-secondary mb-4">What's new</h2>
-            <div className="space-y-3">
-              <div className="bg-purple-600 text-white rounded-xl p-4 text-sm font-medium">
+            <h2 className="text-sm font-semibold text-secondary mb-3">What's new</h2>
+            <div className="space-y-2">
+              <div className="bg-[#5C4890] text-white rounded-2xl p-4 text-xs font-medium shadow-card min-h-[60px] flex items-center">
                 New Photo Filters
               </div>
-              <div className="bg-actionButton text-white rounded-xl p-4 text-sm font-medium">
+              <div className="bg-actionButton text-white rounded-2xl p-4 text-xs font-medium shadow-card min-h-[60px] flex items-center">
                 New Games Available
               </div>
             </div>
@@ -248,30 +245,18 @@ export default function Home() {
 
           {/* Notifications Section */}
           <div>
-            <h2 className="text-xl font-semibold text-secondary mb-4">Notifications</h2>
+            <h2 className="text-sm font-semibold text-secondary mb-3">Notifications</h2>
             <div className="space-y-2">
-              <div className="bg-gray-400 text-white rounded-xl p-3 text-center text-sm">
+              <div className="bg-[#808080] text-white rounded-2xl px-4 py-3 text-center text-xs shadow-card">
                 No new comments
               </div>
-              <div className="bg-primary/80 text-white rounded-xl p-3 text-xs">
+              <div className="bg-primary text-white rounded-2xl px-4 py-3 text-xs shadow-card">
                 "New chair" has been revealed 20 times
               </div>
-              <div className="bg-primary text-white rounded-xl p-3 text-xs">
+              <div className="bg-primary text-white rounded-2xl px-4 py-3 text-xs shadow-card">
                 "Gender reveal" has been revealed 45 times
               </div>
             </div>
-          </div>
-
-          {/* Friend Requests */}
-          <div>
-            <h2 className="text-xl font-semibold text-secondary mb-4">Friend Requests</h2>
-            <FriendRequests />
-          </div>
-
-          {/* Friends List */}
-          <div>
-            <h2 className="text-xl font-semibold text-secondary mb-4">My Friends</h2>
-            <FriendsList currentUserId={session.user.id} />
           </div>
         </aside>
       </div>
