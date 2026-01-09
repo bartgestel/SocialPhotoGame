@@ -1,5 +1,6 @@
 import { pgTable, text, timestamp, boolean, integer, pgEnum, unique, index, jsonb, foreignKey } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
+import { number } from "better-auth";
 
 // --------------------------------------------------------------------------------
 // 1. ENUMS
@@ -38,7 +39,9 @@ export const session = pgTable("session", {
     userId: text("user_id")
         .notNull()
         .references(() => user.id, { onDelete: "cascade" }),
-});
+}, (table) => ({
+    userIdx: index('idx_session_user').on(table.userId),
+}));
 
 export const account = pgTable("account", {
     id: text("id").primaryKey(),
@@ -95,6 +98,8 @@ export const games = pgTable('games', {
     difficultyLevel: integer('difficulty_level').default(1),
     assetBundleUrl: text('asset_bundle_url'),
     isActive: boolean('is_active').default(true),
+    hasPieces: boolean('has_pieces').default(false),
+    gridSize: integer('grid_size').default(0),
 });
 
 // Pictures Table (Content)
@@ -126,10 +131,10 @@ export const pictures = pgTable('pictures', {
 export const pictureRecipients = pgTable('picture_recipients', {
     recipientRecordId: text('recipient_record_id').primaryKey(),
     pictureId: text('picture_id').notNull().references(() => pictures.pictureId, { onDelete: 'cascade' }),
-    
+
     // OPTIONAL: Can be null for anonymous recipients
     receiverId: text('receiver_id').references(() => user.id, { onDelete: 'cascade' }),
-    
+
     // For tracking anonymous users
     recipientIdentifier: text('recipient_identifier'), // Session ID, fingerprint, or anonymous ID
 
@@ -152,4 +157,6 @@ export const unlockAttempts = pgTable('unlock_attempts', {
 
     startedAt: timestamp('started_at', { withTimezone: true }).defaultNow(),
     completedAt: timestamp('completed_at', { withTimezone: true }),
-});
+}, (table) => ({
+    recipientIdx: index('idx_attempts_by_recipient').on(table.recipientRecordId),
+}));

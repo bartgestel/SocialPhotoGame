@@ -5,6 +5,7 @@ import { eq, and } from "drizzle-orm";
 import crypto from "crypto";
 import path from "path";
 import fs from "fs";
+import sharp from "sharp";
 
 // Upload a picture with game lock
 export const uploadPicture = async (req: Request, res: Response) => {
@@ -154,16 +155,14 @@ export const getPictureMedia = async (req: Request, res: Response) => {
         // Mark as viewed if not already
         if (recipient[0].status === 'UNLOCKED') {
             await db
-                .update(pictureRecipients)        console.error("Error uploading picture:", error);
-        res.status(500).json({ error: "Failed to upload picture" });
-    }
+                .update(pictureRecipients)
                 .set({ status: 'VIEWED' })
                 .where(eq(pictureRecipients.recipientRecordId, recipient[0].recipientRecordId));
         }
 
         // Serve the file
         const filePath = path.join(process.cwd(), picture[0].mediaUrl);
-        
+
         if (!fs.existsSync(filePath)) {
             return res.status(404).json({ error: "Media file not found" });
         }
@@ -188,11 +187,16 @@ export const getMyPictures = async (req: Request, res: Response) => {
             .select()
             .from(pictures)
             .where(eq(pictures.senderId, userId))
-            .orderBy(pictures.createdAt);
+            .orderBy(pictures.createdAt)
+            .limit(100);  // Prevent unbounded result sets
 
         res.status(200).json({ pictures: myPictures });
     } catch (error) {
         console.error("Error fetching user pictures:", error);
         res.status(500).json({ error: "Failed to fetch pictures" });
     }
+};
+
+export const getPicturePieces = async (req: Request, res: Response) => {
+
 };

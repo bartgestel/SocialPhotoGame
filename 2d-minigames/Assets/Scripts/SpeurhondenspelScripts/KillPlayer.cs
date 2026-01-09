@@ -6,9 +6,9 @@ public class KillPlayer : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            Destroy(other.gameObject);
+            other.GetComponent<PlayerController>().ResetMovement();
             SpeurhondenManager.Instance.PlayerDied();
-            Debug.Log("Player died!");
         }
+
     }
 }

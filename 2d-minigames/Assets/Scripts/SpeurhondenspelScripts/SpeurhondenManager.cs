@@ -4,24 +4,54 @@ using UnityEngine.SceneManagement;
 public class SpeurhondenManager : MonoBehaviour
 {
     public static SpeurhondenManager Instance;
-
     public GameObject deathPanel;
+    public Transform playerStart;
+    public int totalBones = 3;
+    [HideInInspector] public int bonesCollected = 0;
+
+    private bool isGameOver = false;
 
     private void Awake()
     {
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
         Instance = this;
-        deathPanel.SetActive(false);
+        Time.timeScale = 1f;
+        if (deathPanel != null) deathPanel.SetActive(false);
     }
 
     public void PlayerDied()
     {
+        if (isGameOver) return;
+        isGameOver = true;
         Time.timeScale = 0f;
-        deathPanel.SetActive(true);
+        if (deathPanel != null) deathPanel.SetActive(true);
     }
 
-    public void RestartGame()
+    public void RestartPlayer()
     {
+        if (!isGameOver) return;
+
+        isGameOver = false;
         Time.timeScale = 1f;
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+
+        PlayerController player = FindObjectOfType<PlayerController>();
+        if (player != null)
+        {
+            player.transform.position = playerStart.position;
+            player.ResetMovement();
+        }
+
+        if (deathPanel != null)
+            deathPanel.SetActive(false);
+    }
+
+    public void CollectBone()
+    {
+        bonesCollected++;
+        BoneUIManager.Instance.UpdateUI(bonesCollected);
     }
 }

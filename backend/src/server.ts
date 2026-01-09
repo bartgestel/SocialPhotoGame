@@ -20,8 +20,8 @@ const PORT = 3000;
 
 app.use(cors({
     origin: [
-        "http://localhost:5173", 
-        "http://localhost", 
+        "http://localhost:5173",
+        "http://localhost",
         "https://bartvangestel.nl",
         "https://www.bartvangestel.nl",
         "http://bartvangestel.nl",
@@ -38,10 +38,13 @@ app.use(express.json());
 // Serve static files from uploads directory
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-app.use((req, res, next) => {
-    console.log(`Incoming: [${req.method}] ${req.url}`);
-    next();
-});
+// Only log requests in development
+if (process.env.NODE_ENV !== 'production') {
+    app.use((req, res, next) => {
+        console.log(`Incoming: [${req.method}] ${req.url}`);
+        next();
+    });
+}
 
 app.all(/\/api\/auth\/*/, async (req, res) => {
     try {
