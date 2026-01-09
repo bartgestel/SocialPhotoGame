@@ -21,7 +21,7 @@ TagManager:
   - Snappable
   - PipeTrigger
   - UnBreakable
-  - 
+  - Track
   - 
   - 
   - 
@@ -46,5 +46,19 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Road
+    uniqueID: 834358749
+    locked: 0
+  - name: Finish
+    uniqueID: 2275702289
+    locked: 0
+  - name: Walls
+    uniqueID: 222791411
+    locked: 0
+  - name: Player
+    uniqueID: 3868399271
+    locked: 0
   m_RenderingLayers:
   - Default
+  - Layer 1
+  - Layer 2

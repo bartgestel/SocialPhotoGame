@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class CarController : MonoBehaviour
 {
@@ -14,30 +15,44 @@ public class CarController : MonoBehaviour
     private bool respawning = false;
     private bool finished = false;
 
+    [Header("Countdown")]
+    public CountdownManager countdown;
+    private bool countingDown = false;
+
+    [Header("Finish Gate")]
+    public FinishLine finishLine; // drag your FinishLine object here
+
     void Start()
     {
         normalSpeed = speed;
+
+        // Block instant win on spawn (since you spawn on finish)
+        if (finishLine != null)
+        {
+            finishLine.ResetFinishGate();
+        }
+
+        // Start countdown at game start
+        if (countdown != null)
+        {
+            StartCoroutine(DoCountdown());
+        }
     }
 
     void Update()
     {
-        if (finished)
-            return; // Auto doet niets meer bij finish
+        if (finished) return;
+        if (respawning) return;
+        if (countingDown) return;
 
-        if (respawning)
-            return; // Auto beweegt niet tijdens respawn animatie
-
-        // Auto rijdt vanzelf vooruit
         transform.Translate(Vector3.up * speed * Time.deltaTime);
 
-        // Sturen
         float steer = Input.GetAxisRaw("Horizontal");
         if (steer != 0)
         {
             transform.Rotate(Vector3.forward * -steer * turnSpeed * Time.deltaTime);
         }
 
-        // Snelheid aanpassen als je in olie zit
         speed = inOil ? slowSpeed : normalSpeed;
     }
 
@@ -48,10 +63,7 @@ public class CarController : MonoBehaviour
             inOil = true;
         }
 
-        if (col.CompareTag("Finish"))
-        {
-            FinishRace();
-        }
+        // Finish is handled by FinishLine.cs now
     }
 
     void OnTriggerExit2D(Collider2D col)
@@ -64,13 +76,13 @@ public class CarController : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D col)
     {
-        if (col.collider.CompareTag("Wall") && !respawning)
+        if (col.collider.CompareTag("Wall") && !respawning && !finished)
         {
             StartCoroutine(Respawn());
         }
     }
 
-    private System.Collections.IEnumerator Respawn()
+    private IEnumerator Respawn()
     {
         respawning = true;
 
@@ -84,9 +96,32 @@ public class CarController : MonoBehaviour
 
         speed = oldSpeed;
         respawning = false;
+
+        // After respawn, also block instant win again until player leaves finish trigger
+        if (finishLine != null)
+        {
+            finishLine.ResetFinishGate();
+        }
+
+        // Start countdown again after respawn
+        if (countdown != null)
+        {
+            StartCoroutine(DoCountdown());
+        }
     }
 
-    void FinishRace()
+    private IEnumerator DoCountdown()
+    {
+        countingDown = true;
+
+        countdown.StartCountdown();
+
+        yield return new WaitForSeconds(3.5f);
+
+        countingDown = false;
+    }
+
+    public void FinishRace()
     {
         finished = true;
         speed = 0f;
