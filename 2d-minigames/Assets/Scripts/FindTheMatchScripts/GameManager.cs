@@ -100,8 +100,7 @@ public class GameManager : MonoBehaviour
 		}
 		Canvas.ForceUpdateCanvases();
 		LayoutRebuilder.ForceRebuildLayoutImmediate(
-	cardParent as RectTransform
-);
+			cardParent as RectTransform);
 	}
 
 	public void CardFlipped(Card card)
@@ -190,7 +189,7 @@ public class GameManager : MonoBehaviour
 		if (matchedPairs <= totalPairs && !gameOver)
 		{
 			GuessProcess++;
-			GuessText.text = $"{GuessProcess} / {GuessLimit}";
+			GuessText.text = $"{GuessProcess} / {GuessLimit} Guesses";
 			if (GuessProcess >= GuessLimit)
 			{
 				GameOver();
