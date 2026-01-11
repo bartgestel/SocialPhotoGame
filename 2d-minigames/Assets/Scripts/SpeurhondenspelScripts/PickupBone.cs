@@ -6,6 +6,7 @@ public class BonePickup : MonoBehaviour
     {
         if (!other.CompareTag("Player")) return;
         SpeurhondenManager.Instance.CollectBone();
+        SpeurhondenManager.Instance.SetCheckpoint(transform.position);
         Destroy(gameObject);
     }
 }

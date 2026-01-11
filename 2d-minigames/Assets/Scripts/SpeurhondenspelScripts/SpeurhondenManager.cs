@@ -8,8 +8,8 @@ public class SpeurhondenManager : MonoBehaviour
     public Transform playerStart;
     public int totalBones = 3;
     [HideInInspector] public int bonesCollected = 0;
-
     private bool isGameOver = false;
+    private Vector3 lastCheckpoint;
 
     private void Awake()
     {
@@ -21,6 +21,11 @@ public class SpeurhondenManager : MonoBehaviour
         Instance = this;
         Time.timeScale = 1f;
         if (deathPanel != null) deathPanel.SetActive(false);
+
+        if (playerStart != null)
+        {
+            lastCheckpoint = playerStart.position;
+        }
     }
 
     public void PlayerDied()
@@ -34,17 +39,14 @@ public class SpeurhondenManager : MonoBehaviour
     public void RestartPlayer()
     {
         if (!isGameOver) return;
-
         isGameOver = false;
         Time.timeScale = 1f;
-
         PlayerController player = FindObjectOfType<PlayerController>();
         if (player != null)
         {
-            player.transform.position = playerStart.position;
+            player.transform.position = lastCheckpoint;
             player.ResetMovement();
         }
-
         if (deathPanel != null)
             deathPanel.SetActive(false);
     }
@@ -53,5 +55,10 @@ public class SpeurhondenManager : MonoBehaviour
     {
         bonesCollected++;
         BoneUIManager.Instance.UpdateUI(bonesCollected);
+    }
+
+    public void SetCheckpoint(Vector3 checkpointPosition)
+    {
+        lastCheckpoint = checkpointPosition;
     }
 }

@@ -6,7 +6,8 @@ public class XonixManager : MonoBehaviour
 {
     public static XonixManager Instance;
     private List<RedBlock> currentTrail = new List<RedBlock>();
-    public LayerMask redBlockLayer; 
+    public LayerMask redBlockLayer;
+    public float gridSize = 1f; // Add this to match your grid size
 
     private void Awake()
     {
@@ -53,35 +54,47 @@ public class XonixManager : MonoBehaviour
             }
         }
 
-        // Find which region contains enemies (don't delete that one)
+        // Find ALL regions that contain enemies (don't delete any of them)
         Collider2D[] enemies = GameObject.FindGameObjectsWithTag("Enemy")
             .Select(e => e.GetComponent<Collider2D>())
             .Where(c => c != null)
             .ToArray();
 
-        HashSet<RedBlock> regionWithEnemies = null;
+        HashSet<HashSet<RedBlock>> regionsWithEnemies = new HashSet<HashSet<RedBlock>>();
 
         foreach (var region in regions)
         {
+            bool hasEnemy = false;
             foreach (var block in region)
             {
-                foreach (var enemy in enemies)
+                // Use OverlapCircle to check for enemies near this block
+                Collider2D[] nearbyColliders = Physics2D.OverlapCircleAll(
+                    block.transform.position,
+                    gridSize * 0.6f // Check within 60% of grid size radius
+                );
+
+                foreach (var col in nearbyColliders)
                 {
-                    if (Vector2.Distance(block.transform.position, enemy.transform.position) < 0.5f)
+                    if (col.CompareTag("Enemy"))
                     {
-                        regionWithEnemies = region;
+                        regionsWithEnemies.Add(region);
+                        hasEnemy = true;
+                        Debug.Log($"Region contains enemy at {col.transform.position} near block at {block.transform.position}");
                         break;
                     }
                 }
-                if (regionWithEnemies != null) break;
+                if (hasEnemy) break;
             }
-            if (regionWithEnemies != null) break;
         }
 
+        Debug.Log($"Found {regions.Count} regions, {regionsWithEnemies.Count} contain enemies");
+
+        // Delete all regions that DON'T contain enemies
         foreach (var region in regions)
         {
-            if (region != regionWithEnemies)
+            if (!regionsWithEnemies.Contains(region))
             {
+                Debug.Log($"Deleting region with {region.Count} blocks");
                 foreach (var block in region)
                 {
                     if (block != null)
@@ -90,8 +103,13 @@ public class XonixManager : MonoBehaviour
                     }
                 }
             }
+            else
+            {
+                Debug.Log($"Keeping region with {region.Count} blocks (has enemy)");
+            }
         }
 
+        // Delete the green trail blocks
         foreach (RedBlock red in currentTrail)
         {
             if (red != null)
@@ -120,7 +138,7 @@ public class XonixManager : MonoBehaviour
 
         foreach (var dir in directions)
         {
-            Vector3 checkPos = start.transform.position + dir;
+            Vector3 checkPos = start.transform.position + dir * gridSize;
 
             foreach (var block in allBlocks)
             {

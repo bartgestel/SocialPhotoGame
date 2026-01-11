@@ -13,6 +13,7 @@ public class XonixController : MonoBehaviour
     private InputAction moveAction;
     private static Collider2D[] hitBuffer = new Collider2D[8];
     private bool isOnBorder = true;
+    private bool wasOnRedBlock = false;
 
     private void Awake()
     {
@@ -30,7 +31,6 @@ public class XonixController : MonoBehaviour
     private void Update()
     {
         if (isMoving) return;
-
         Vector2 input = moveAction.ReadValue<Vector2>();
         if (Mathf.Abs(input.x) > Mathf.Abs(input.y))
             input = new Vector2(Mathf.Sign(input.x), 0);
@@ -38,7 +38,6 @@ public class XonixController : MonoBehaviour
             input = new Vector2(0, Mathf.Sign(input.y));
         else
             return;
-
         TryMove(input);
     }
 
@@ -51,17 +50,15 @@ public class XonixController : MonoBehaviour
             0f,
             hitBuffer
         );
-
         for (int i = 0; i < count; i++)
         {
             Collider2D hit = hitBuffer[i];
             if (hit == null || hit.gameObject == gameObject) continue;
-            if (hit.isTrigger) continue; 
+            if (hit.isTrigger) continue;
             if (hit.CompareTag("Enemy"))
                 continue;
             return;
         }
-
         targetPos = newPos;
         isMoving = true;
     }
@@ -69,13 +66,11 @@ public class XonixController : MonoBehaviour
     private void FixedUpdate()
     {
         if (!isMoving) return;
-
         rb.position = Vector2.MoveTowards(
             rb.position,
             targetPos,
             moveSpeed * Time.fixedDeltaTime
         );
-
         if (Vector2.Distance(rb.position, targetPos) < 0.01f)
         {
             rb.position = targetPos;
@@ -87,25 +82,25 @@ public class XonixController : MonoBehaviour
     private void CheckBlockUnderPlayer()
     {
         int count = Physics2D.OverlapPointNonAlloc(transform.position, hitBuffer);
-
         bool onBorderNow = false;
         bool onRedBlock = false;
+        bool onEmptySpace = true;
         RedBlock redBlock = null;
 
         for (int i = 0; i < count; i++)
         {
             Collider2D hit = hitBuffer[i];
             if (hit == null || hit.gameObject == gameObject) continue;
-
             if (hit.CompareTag("Border"))
             {
                 onBorderNow = true;
+                onEmptySpace = false;
             }
-
             RedBlock red = hit.GetComponent<RedBlock>();
             if (red != null)
             {
                 onRedBlock = true;
+                onEmptySpace = false;
                 redBlock = red;
             }
         }
@@ -115,16 +110,18 @@ public class XonixController : MonoBehaviour
             if (!redBlock.isGreen)
             {
                 redBlock.TurnGreen();
+                wasOnRedBlock = true;
                 isOnBorder = false;
             }
         }
 
-        if (onBorderNow && !isOnBorder)
+        if ((onBorderNow || onEmptySpace) && wasOnRedBlock)
         {
             if (XonixManager.Instance != null)
             {
                 XonixManager.Instance.CompleteTrail();
             }
+            wasOnRedBlock = false;
             isOnBorder = true;
         }
         else if (onBorderNow)
@@ -141,6 +138,7 @@ public class XonixController : MonoBehaviour
             {
                 XonixManager.Instance.ResetTrail();
             }
+            wasOnRedBlock = false;
             Debug.Log("Hit by enemy!");
         }
     }
