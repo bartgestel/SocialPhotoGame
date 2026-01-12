@@ -23,6 +23,7 @@ export default function PostOverview() {
   const { data: session, isPending } = authClient.useSession();
   const [comment, setComment] = useState("");
   const [commentName, setCommentName] = useState("");
+  const [imageZoomed, setImageZoomed] = useState(false);
   
   // Mock post data - replace with API call
   const [post, setPost] = useState<Post>({
@@ -236,78 +237,113 @@ export default function PostOverview() {
             <div className="max-w-xl mx-auto px-8">
               <h2 className="text-lg font-medium text-secondary pb-2 mb-6 border-b border-secondary/40">Post overview</h2>
                 
-                <div className="bg-white rounded-2xl p-6 shadow-lg space-y-6">
-                  {/* Title (Read-only) */}
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-secondary">Title</label>
-                    <div className="px-4 py-3 bg-tertiary rounded-2xl text-secondary">
-                      {post.title}
-                    </div>
-                  </div>
+              {/* Picture at Top */}
+              <div 
+                className="bg-white rounded-2xl overflow-hidden shadow-lg mb-6 max-w-[280px] mx-auto cursor-pointer relative group"
+                onClick={() => setImageZoomed(true)}
+              >
+                <img 
+                  src={post.imageUrl} 
+                  alt={post.title}
+                  className="w-full aspect-[3/4] object-cover"
+                />
+                {/* Zoom Icon Overlay */}
+                <div className="absolute top-3 right-3 bg-white/80 backdrop-blur-sm rounded-full p-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <svg className="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
+                  </svg>
+                </div>
+              </div>
 
-                  {/* Description (Read-only) */}
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-secondary">Description</label>
-                    <div className="px-4 py-3 bg-tertiary rounded-2xl text-secondary min-h-[120px]">
-                      {post.description}
-                    </div>
-                  </div>
-
-                  {/* Comments Section */}
-                  <div className="space-y-4 pt-4 border-t border-secondary/20">
-                    <h3 className="text-sm font-medium text-secondary">Comments</h3>
-                    
-                    <div className="space-y-3 max-h-64 overflow-y-auto">
-                      {post.comments.map((commentItem) => (
-                        <div key={commentItem.id} className="pb-3 border-b border-secondary/10">
-                          <p className="font-semibold text-secondary text-sm mb-1">{commentItem.userName}</p>
-                          <p className="text-secondary text-sm">{commentItem.text}</p>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Comment Input */}
-                    <div className="space-y-3 pt-2">
-                      <input
-                        type="text"
-                        value={commentName}
-                        onChange={(e) => setCommentName(e.target.value)}
-                        placeholder="Your name"
-                        className="w-full px-4 py-3 bg-tertiary rounded-xl text-secondary placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20"
-                      />
-                      <textarea
-                        value={comment}
-                        onChange={(e) => setComment(e.target.value)}
-                        placeholder="Write comment"
-                        rows={4}
-                        className="w-full px-4 py-3 bg-tertiary rounded-xl text-secondary placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
-                      />
-                      <button
-                        onClick={handleSendComment}
-                        disabled={!comment.trim() || !commentName.trim()}
-                        className="w-full py-3 bg-actionButton text-white rounded-xl font-medium hover:opacity-90 transition-opacity shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        Send
-                      </button>
-                    </div>
+              <div className="bg-white rounded-2xl p-6 shadow-lg space-y-6">
+                {/* Title (Read-only) */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-secondary">Title</label>
+                  <div className="px-4 py-3 bg-tertiary rounded-2xl text-secondary">
+                    {post.title}
                   </div>
                 </div>
+
+                {/* Description (Read-only) */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-secondary">Description</label>
+                  <div className="px-4 py-3 bg-tertiary rounded-2xl text-secondary min-h-[120px]">
+                    {post.description}
+                  </div>
+                </div>
+              </div>
             </div>
           </main>
         </div>
 
-        {/* Right Sidebar - Mirror of Left */}
-        <aside className="w-80 bg-tertiary overflow-y-auto px-6 pt-48 pb-8 mr-32 scrollbar-hide">
+        {/* Right Sidebar - Comments Section */}
+        <aside className="w-80 bg-tertiary px-6 pt-48 pb-8 mr-32">
           <div className="mt-20">
-            <div className="bg-white rounded-2xl overflow-hidden shadow-md">
-              <img 
-                src={post.imageUrl} 
-                alt={post.title}
-                className="w-full aspect-[3/4] object-cover"
-              />
+            <div className="bg-white rounded-2xl p-6 shadow-lg flex flex-col max-h-[calc(100vh-20rem)]">
+              <h3 className="text-lg font-medium text-secondary mb-6 pb-2 border-b border-secondary/40">Comments</h3>
+              
+              {/* Existing Comments - Scrollable */}
+              <div className="space-y-3 overflow-y-auto mb-6 flex-1 pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+                {post.comments.map((commentItem) => (
+                  <div key={commentItem.id} className="pb-3 border-b border-secondary/10">
+                    <p className="font-semibold text-secondary text-sm mb-1">{commentItem.userName}</p>
+                    <p className="text-secondary text-sm">{commentItem.text}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Comment Input - Fixed at Bottom */}
+              <div className="space-y-3 pt-4 border-t border-secondary/20">
+                <input
+                  type="text"
+                  value={commentName}
+                  onChange={(e) => setCommentName(e.target.value)}
+                  placeholder="Your name"
+                  className="w-full px-4 py-3 bg-tertiary rounded-xl text-secondary placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+                <textarea
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  placeholder="Write comment"
+                  rows={4}
+                  className="w-full px-4 py-3 bg-tertiary rounded-xl text-secondary placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
+                />
+                <button
+                  onClick={handleSendComment}
+                  disabled={!comment.trim() || !commentName.trim()}
+                  className="w-full py-3 bg-actionButton text-white rounded-xl font-medium hover:opacity-90 transition-opacity shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Send
+                </button>
+              </div>
             </div>
           </div>
         </aside>
+
+        {/* Image Zoom Modal */}
+        {imageZoomed && (
+          <div 
+            className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-8"
+            onClick={() => setImageZoomed(false)}
+          >
+            <button
+              onClick={() => setImageZoomed(false)}
+              className="absolute top-4 right-4 text-white hover:text-gray-300 transition-colors"
+            >
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <div className="max-w-4xl max-h-full">
+              <img 
+                src={post.imageUrl} 
+                alt={post.title}
+                className="max-w-full max-h-[90vh] object-contain rounded-lg"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
