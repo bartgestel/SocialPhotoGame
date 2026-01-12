@@ -6,6 +6,7 @@ interface Comment {
   commenterId: string;
   content: string;
   createdAt: string;
+  username?: string;
 }
 
 interface CommentsProps {
@@ -130,10 +131,11 @@ export default function Comments({ pictureId, isOwner = false }: CommentsProps) 
               key={comment.commentId}
               className="bg-gray-50 rounded-lg p-4 border border-gray-200"
             >
+              <div className="flex items-center mb-1">
+                <span className="font-semibold text-blue-700 mr-2">{comment.username || 'Unknown'}</span>
+                <span className="text-xs text-gray-500">{new Date(comment.createdAt).toLocaleString()}</span>
+              </div>
               <p className="text-gray-800">{comment.content}</p>
-              <p className="text-xs text-gray-500 mt-2">
-                {new Date(comment.createdAt).toLocaleString()}
-              </p>
             </div>
           ))}
         </div>
