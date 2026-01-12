@@ -10,23 +10,18 @@ public class PlayerController : MonoBehaviour
     private Vector2 targetPos;
     private bool isMoving = false;
     private Rigidbody2D rb;
-
     public InputActionAsset inputActions;
     private InputAction moveAction;
-
     private Animator animator;
     private SpriteRenderer spriteRenderer;
-
     private static Collider2D[] hitBuffer = new Collider2D[5];
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
         rb.bodyType = RigidbodyType2D.Kinematic;
-
         animator = GetComponent<Animator>();
         spriteRenderer = GetComponent<SpriteRenderer>();
-
         moveAction = inputActions.FindActionMap("Player").FindAction("Move");
         targetPos = rb.position;
     }
@@ -43,22 +38,15 @@ public class PlayerController : MonoBehaviour
         }
 
         Vector2 input = moveAction.ReadValue<Vector2>();
-
-        if (Mathf.Abs(input.x) > Mathf.Abs(input.y))
-            input = new Vector2(Mathf.Sign(input.x), 0);
-        else if (input != Vector2.zero)
-            input = new Vector2(0, Mathf.Sign(input.y));
+        if (Mathf.Abs(input.x) > Mathf.Abs(input.y)) input = new Vector2(Mathf.Sign(input.x), 0);
+        else if (input != Vector2.zero) input = new Vector2(0, Mathf.Sign(input.y));
         else
         {
-            animator.speed = 0f; 
+            animator.speed = 0f;
             return;
         }
 
-        if (input.x < 0)
-            spriteRenderer.flipX = true;
-        else if (input.x > 0)
-            spriteRenderer.flipX = false;
-
+        spriteRenderer.flipX = input.x < 0;
         animator.speed = 1f;
         TryMove(input);
     }
@@ -71,8 +59,9 @@ public class PlayerController : MonoBehaviour
         for (int i = 0; i < count; i++)
         {
             Collider2D hit = hitBuffer[i];
-            if (hit == null || hit.gameObject == gameObject) continue;
-            if (hit.isTrigger) continue;
+            if (hit == null || hit.gameObject == gameObject || hit.isTrigger) continue;
+
+            if (hit.CompareTag("Enemy")) continue;
 
             if (!hit.CompareTag("Pushable")) return;
 
@@ -89,12 +78,17 @@ public class PlayerController : MonoBehaviour
         if (!isMoving) return;
 
         rb.position = Vector2.MoveTowards(rb.position, targetPos, moveSpeed * Time.fixedDeltaTime);
-
         if (Vector2.Distance(rb.position, targetPos) < 0.01f)
         {
             rb.position = targetPos;
             isMoving = false;
-            animator.speed = 0f; 
+            animator.speed = 0f;
         }
+    }
+
+    public void ResetMovement()
+    {
+        isMoving = false;
+        targetPos = transform.position;
     }
 }

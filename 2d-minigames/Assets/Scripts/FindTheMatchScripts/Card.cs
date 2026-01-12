@@ -10,7 +10,7 @@ public class Card : MonoBehaviour
 	public Sprite backSprite;
 
 	private bool isFlipped = false;
-	private bool isMatched = false;
+	public bool isMatched = false;
 
 	private GameManager gameManager;
 
@@ -73,6 +73,7 @@ public class Card : MonoBehaviour
 			yield return null;
 		}
 		transform.localScale = endScale;
+		transform.localScale = new Vector3(1f, transform.localScale.y, transform.localScale.z);
 	}
 
 	public void SetMatched()

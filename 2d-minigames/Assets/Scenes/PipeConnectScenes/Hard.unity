@@ -6298,7 +6298,7 @@ MonoBehaviour:
   snapDistance: 2
   snappableLayer:
     serializedVersion: 2
-    m_Bits: 256
+    m_Bits: 0
 --- !u!50 &860834073
 Rigidbody2D:
   serializedVersion: 5
@@ -8790,7 +8790,7 @@ MonoBehaviour:
   snapDistance: 2
   snappableLayer:
     serializedVersion: 2
-    m_Bits: 256
+    m_Bits: 0
 --- !u!50 &1240910166
 Rigidbody2D:
   serializedVersion: 5

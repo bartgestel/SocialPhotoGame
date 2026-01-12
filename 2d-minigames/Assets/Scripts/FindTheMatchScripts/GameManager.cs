@@ -1,13 +1,15 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using TMPro;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
-using System.Collections;
 
 public class GameManager : MonoBehaviour
 {
 	public GameObject cardPrefab;
 	public Transform cardParent;
-	public List<Sprite> cardSprites;       // normal sprites (each appears once)
+	public List<Sprite> cardSprites;
 
 	public Sprite badCardSprite;           // Sprite for bad cards (same image for both)
 	
@@ -16,6 +18,8 @@ public class GameManager : MonoBehaviour
 
 	private Card firstCard, secondCard;
 	private bool canFlip = true;
+	private bool firstFlipDone = false;
+	private bool gameOver = false;
 
 	public AudioSource audioSource;
 	public AudioClip flipSound;
@@ -27,6 +31,17 @@ public class GameManager : MonoBehaviour
 	private int totalPairs;
 	
 	private bool usingPuzzlePieces = false;
+
+	private List<Card> allCards = new List<Card>();
+
+	[Header("UI")]
+	public GameObject gameOverPanel;
+
+
+	[Header("Guess Limit")]
+	public int GuessLimit;
+	private int GuessProcess = 0;
+	[SerializeField] private TextMeshProUGUI GuessText;
 
 	void Start()
 	{
@@ -107,7 +122,7 @@ public class GameManager : MonoBehaviour
 
 	public bool CanFlip()
 	{
-		return canFlip;
+		return canFlip && !gameOver;
 	}
 
 	void CreateBoard()
@@ -122,14 +137,14 @@ public class GameManager : MonoBehaviour
 		
 		List<Sprite> fullDeck = new List<Sprite>();
 
-		// NORMAL CARD PAIRS
-		for (int i = 0; i < cardSprites.Count; i++)
+		// NORMAL PAIRS
+		foreach (Sprite sprite in cardSprites)
 		{
-			fullDeck.Add(cardSprites[i]);
-			fullDeck.Add(cardSprites[i]);
+			fullDeck.Add(sprite);
+			fullDeck.Add(sprite);
 		}
 
-		totalPairs = cardSprites.Count; // used for win detection
+		totalPairs = cardSprites.Count;
 
 		// BAD CARD PAIR (2 cards)
 		if (badCardSprite != null)
@@ -140,7 +155,18 @@ public class GameManager : MonoBehaviour
 		
 		Debug.Log($"Total deck size: {fullDeck.Count} cards ({totalPairs} pairs + {(badCardSprite != null ? 2 : 0)} bad cards)");
 
-		// SHUFFLE DECK
+		// Clamp to avoid errors
+		int pairsToAdd = Mathf.Min(badPairsToUse, availableBadCards.Count);
+
+		for (int i = 0; i < pairsToAdd; i++)
+		{
+			Sprite badSprite = availableBadCards[i];
+			fullDeck.Add(badSprite);
+			fullDeck.Add(badSprite);
+		}
+
+
+		// SHUFFLE
 		for (int i = 0; i < fullDeck.Count; i++)
 		{
 			Sprite temp = fullDeck[i];
@@ -155,21 +181,28 @@ public class GameManager : MonoBehaviour
 			GameObject obj = Instantiate(cardPrefab, cardParent);
 			Card card = obj.GetComponent<Card>();
 
-			// Assign front sprite
 			card.frontSprite = fullDeck[i];
+			card.isBadCard = badCardSprites.Contains(fullDeck[i]);
 
-			// Detect if this is a bad card
-			if (fullDeck[i] == badCardSprite)
-			{
-				card.isBadCard = true;
-			}
-
-			card.id = i / 2;
+			allCards.Add(card);
 		}
+		Canvas.ForceUpdateCanvases();
+		LayoutRebuilder.ForceRebuildLayoutImmediate(
+			cardParent as RectTransform);
 	}
 
 	public void CardFlipped(Card card)
 	{
+		if (gameOver) return;
+
+		// FIRST FLIP PROTECTION
+		if (!firstFlipDone)
+		{
+			firstFlipDone = true;
+			if (card.isBadCard)
+				SwapBadCard(card);
+		}
+
 		if (flipSound != null)
 			audioSource.PlayOneShot(flipSound);
 
@@ -184,14 +217,36 @@ public class GameManager : MonoBehaviour
 		}
 	}
 
+	void SwapBadCard(Card badCard)
+	{
+		List<Card> validCards = new List<Card>();
+
+		foreach (Card c in allCards)
+		{
+			if (!c.isBadCard && !c.isMatched && c != badCard)
+				validCards.Add(c);
+		}
+
+		if (validCards.Count == 0) return;
+
+		Card swapTarget = validCards[Random.Range(0, validCards.Count)];
+
+		Sprite tempSprite = swapTarget.frontSprite;
+		swapTarget.frontSprite = badCard.frontSprite;
+		badCard.frontSprite = tempSprite;
+
+		swapTarget.isBadCard = true;
+		badCard.isBadCard = false;
+	}
+
 	IEnumerator CheckMatch()
 	{
 		canFlip = false;
 
 		yield return new WaitForSeconds(0.7f);
 
-		// BAD CARD CHECK
-		if (firstCard.isBadCard && secondCard.isBadCard)
+		// LOSS CONDITION
+		if (firstCard.isBadCard && secondCard.isBadCard) //&& firstCard.frontSprite == secondCard.frontSprite)
 		{
 			Debug.Log("BAD CARDS MATCHED � YOU LOSE");
 
@@ -201,7 +256,7 @@ public class GameManager : MonoBehaviour
 			yield break;
 		}
 
-		// NORMAL MATCH CHECK
+		// MATCH
 		if (firstCard.frontSprite == secondCard.frontSprite)
 		{
 			firstCard.SetMatched();
@@ -222,9 +277,30 @@ public class GameManager : MonoBehaviour
 		firstCard = null;
 		secondCard = null;
 		canFlip = true;
+
+		if (matchedPairs <= totalPairs && !gameOver)
+		{
+			GuessProcess++;
+			GuessText.text = $"{GuessProcess} / {GuessLimit} Guesses";
+			if (GuessProcess >= GuessLimit)
+			{
+				GameOver();
+				yield break;
+			}
+		}
 	}
 
-	private void CheckIfGameComplete()
+	void GameOver()
+	{
+		gameOver = true;
+		canFlip = false;
+		if (loseSound != null)
+			audioSource.PlayOneShot(loseSound);
+
+		gameOverPanel.SetActive(true);
+	}
+
+	void CheckIfGameComplete()
 	{
 		if (matchedPairs >= totalPairs)
 		{
@@ -237,7 +313,13 @@ public class GameManager : MonoBehaviour
 
 			if (winSound != null)
 				audioSource.PlayOneShot(winSound);
+			
 		}
 	}
-}
 
+	// BUTTON CALLBACK
+	public void RestartGame()
+	{
+		SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+	}
+}
