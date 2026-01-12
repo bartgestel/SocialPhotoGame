@@ -22,9 +22,10 @@ export default function PostOverview() {
   const { postId } = useParams<{ postId: string }>();
   const { data: session, isPending } = authClient.useSession();
   const [comment, setComment] = useState("");
+  const [commentName, setCommentName] = useState("");
   
   // Mock post data - replace with API call
-  const [post] = useState<Post>({
+  const [post, setPost] = useState<Post>({
     id: postId || "1",
     title: "Couch reveal",
     imageUrl: "https://via.placeholder.com/400x600/AF8159/FFFFFF?text=Post+Image",
@@ -43,10 +44,23 @@ export default function PostOverview() {
   }, [session, isPending, navigate]);
 
   const handleSendComment = () => {
-    if (comment.trim()) {
+    if (comment.trim() && commentName.trim()) {
+      // Add new comment to the list
+      const newComment = {
+        id: String(Date.now()),
+        userName: commentName.trim(),
+        text: comment.trim()
+      };
+      
+      setPost({
+        ...post,
+        comments: [...post.comments, newComment]
+      });
+      
       // TODO: Send comment to backend
-      console.log("Sending comment:", comment);
+      console.log("Sending comment:", { name: commentName, text: comment });
       setComment("");
+      setCommentName("");
     }
   };
 
@@ -123,16 +137,24 @@ export default function PostOverview() {
             <div className="space-y-3 pt-4">
               <input
                 type="text"
+                value={commentName}
+                onChange={(e) => setCommentName(e.target.value)}
+                placeholder="Your name"
+                className="w-full px-4 py-3 bg-white rounded-full border-none text-secondary placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20"
+              />
+              <textarea
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 placeholder="Write comment"
-                className="w-full px-4 py-3 bg-white rounded-full border-none text-secondary placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                rows={4}
+                className="w-full px-4 py-3 bg-white rounded-2xl border-none text-secondary placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
               />
               <button
                 onClick={handleSendComment}
-                className="w-full py-3 bg-actionButton text-white rounded-full font-medium hover:opacity-90 transition-opacity"
+                disabled={!comment.trim() || !commentName.trim()}
+                className="w-full py-3 bg-actionButton text-white rounded-full font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Sent
+                Send
               </button>
             </div>
           </div>
@@ -178,17 +200,17 @@ export default function PostOverview() {
                 <svg className="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
                 </svg>
-                <span className="text-sm text-secondary">Home</span>
+                <span className="text-sm text-secondary">Dashboard</span>
               </button>
               
               <button
-                onClick={() => navigate("/profile")}
+                onClick={() => navigate("/settings")}
                 className="w-full text-left px-3 py-2 rounded-lg hover:bg-tertiary transition-colors flex items-center gap-3"
               >
                 <svg className="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" />
                 </svg>
-                <span className="text-sm text-secondary">Profile</span>
+                <span className="text-sm text-secondary">Settings</span>
               </button>
             </div>
 
@@ -248,14 +270,22 @@ export default function PostOverview() {
                     <div className="space-y-3 pt-2">
                       <input
                         type="text"
+                        value={commentName}
+                        onChange={(e) => setCommentName(e.target.value)}
+                        placeholder="Your name"
+                        className="w-full px-4 py-3 bg-tertiary rounded-xl text-secondary placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                      />
+                      <textarea
                         value={comment}
                         onChange={(e) => setComment(e.target.value)}
                         placeholder="Write comment"
-                        className="w-full px-4 py-3 bg-tertiary rounded-xl text-secondary placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        rows={4}
+                        className="w-full px-4 py-3 bg-tertiary rounded-xl text-secondary placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 resize-none"
                       />
                       <button
                         onClick={handleSendComment}
-                        className="w-full py-3 bg-actionButton text-white rounded-xl font-medium hover:opacity-90 transition-opacity shadow-md"
+                        disabled={!comment.trim() || !commentName.trim()}
+                        className="w-full py-3 bg-actionButton text-white rounded-xl font-medium hover:opacity-90 transition-opacity shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         Send
                       </button>
