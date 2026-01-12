@@ -978,6 +978,7 @@ MonoBehaviour:
   playerStart: {fileID: 272308076}
   totalBones: 3
   bonesCollected: 0
+  gridSize: 2
 --- !u!1001 &208552686
 PrefabInstance:
   m_ObjectHideFlags: 0

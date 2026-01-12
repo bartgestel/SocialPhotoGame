@@ -1901,6 +1901,7 @@ MonoBehaviour:
   playerStart: {fileID: 66214439}
   totalBones: 3
   bonesCollected: 0
+  gridSize: 2
 --- !u!4 &553464307
 Transform:
   m_ObjectHideFlags: 0
