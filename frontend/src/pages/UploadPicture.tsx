@@ -229,6 +229,7 @@ export default function UploadPicture() {
               <option value="1">Robbie</option>
               <option value="2">Pipe Connect</option>
               <option value="3">Quick Math</option>
+              <option value="2">Find the Match</option>
             </select>
           </div>
 

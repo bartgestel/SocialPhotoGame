@@ -198,5 +198,101 @@ export const getMyPictures = async (req: Request, res: Response) => {
 };
 
 export const getPicturePieces = async (req: Request, res: Response) => {
+    try {
+        const { pictureId } = req.params;
+        const gridSize = parseInt(req.query.gridSize as string) || 3; // Default to 3x3 grid
 
+        // Validate grid size
+        if (gridSize < 2 || gridSize > 10) {
+            return res.status(400).json({ error: "Grid size must be between 2 and 10" });
+        }
+
+        // Get picture
+        const picture = await db
+            .select()
+            .from(pictures)
+            .where(eq(pictures.pictureId, pictureId))
+            .limit(1);
+
+        if (!picture || picture.length === 0) {
+            return res.status(404).json({ error: "Picture not found" });
+        }
+
+        const inputFilePath = path.join(process.cwd(), picture[0].mediaUrl);
+
+        if (!fs.existsSync(inputFilePath)) {
+            return res.status(404).json({ error: "Media file not found" });
+        }
+
+        // Load image and get metadata
+        const image = sharp(inputFilePath);
+        const metadata = await image.metadata();
+
+        if (!metadata.width || !metadata.height) {
+            return res.status(500).json({ error: "Could not read image dimensions" });
+        }
+
+        // Calculate tile dimensions
+        const tileWidth = Math.floor(metadata.width / gridSize);
+        const tileHeight = Math.floor(metadata.height / gridSize);
+
+        // Create output directory for tiles
+        const tilesDir = path.join(process.cwd(), 'uploads', 'tiles', pictureId, `grid-${gridSize}`);
+        if (!fs.existsSync(tilesDir)) {
+            fs.mkdirSync(tilesDir, { recursive: true });
+        }
+
+        // Generate all tiles and collect their paths
+        const tilePaths = [];
+        let count = 0;
+
+        for (let r = 0; r < gridSize; r++) {
+            for (let c = 0; c < gridSize; c++) {
+                const left = c * tileWidth;
+                const top = r * tileHeight;
+
+                const tilePath = path.join(tilesDir, `tile_${count}.jpg`);
+
+                // Only generate if doesn't exist
+                if (!fs.existsSync(tilePath)) {
+                    await image
+                        .clone()
+                        .extract({ left, top, width: tileWidth, height: tileHeight })
+                        .jpeg({ quality: 90 })
+                        .toFile(tilePath);
+                }
+
+                tilePaths.push(tilePath);
+                count++;
+            }
+        }
+
+        // Read all tiles and send as JSON with base64 data
+        const tiles = await Promise.all(
+            tilePaths.map(async (tilePath, index) => {
+                const buffer = await fs.promises.readFile(tilePath);
+                return {
+                    index,
+                    row: Math.floor(index / gridSize),
+                    col: index % gridSize,
+                    data: buffer.toString('base64')
+                };
+            })
+        );
+
+        res.status(200).json({
+            pictureId,
+            gridSize,
+            totalPieces: tiles.length,
+            imageWidth: metadata.width,
+            imageHeight: metadata.height,
+            tileWidth,
+            tileHeight,
+            tiles
+        });
+
+    } catch (error) {
+        console.error("Error generating picture pieces:", error);
+        res.status(500).json({ error: "Failed to generate picture pieces" });
+    }
 };
