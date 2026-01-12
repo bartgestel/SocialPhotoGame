@@ -12,6 +12,7 @@ public class GameConfig
     public string sessionId;
     public string unityScene;
     public string gameId;
+    public string pictureId;
 }
 
 public class GameCoordinatorScript : MonoBehaviour {
@@ -21,7 +22,11 @@ public class GameCoordinatorScript : MonoBehaviour {
     private string _currentUnityScene;
     private string _currentGameId;
     private const string SECRET_KEY = "A64814991BEEC14ED7747FE2E1AFD"; // Must match backend
-    private const string API_URL = "https://bartvangestel.nl/api/games/verify";
+    private const string API_URL = "http://localhost:3000/api/games/verify";
+
+    // Public getters
+    public string CurrentGameId => _currentGameId;
+    public string CurrentSessionId => _currentSessionId;
 
     [DllImport("__Internal")]
     private static extern void ReportUnlockToReact(string gameId);
@@ -39,6 +44,14 @@ public class GameCoordinatorScript : MonoBehaviour {
         GameConfig config = JsonUtility.FromJson<GameConfig>(jsonConfig);
         _currentSessionId = config.sessionId;
         _currentGameId = config.gameId;
+        
+        // Store pictureId for puzzle games
+        if (!string.IsNullOrEmpty(config.pictureId)) {
+            PlayerPrefs.SetString("CurrentPictureId", config.pictureId);
+            PlayerPrefs.Save();
+            Debug.Log($"Stored pictureId: {config.pictureId}");
+        }
+        
         SceneManager.LoadScene(config.unityScene);
     }
 

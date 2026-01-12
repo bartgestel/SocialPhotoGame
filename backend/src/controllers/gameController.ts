@@ -9,8 +9,9 @@ const activeSessions = new Map<string, { gameId: string, shareToken?: string, re
 
 const GAME_SCENE_MAP: Record<string, string> = {
     "quickmath": "Scenes/QuickMathScenes/QuickMathScene",
-    "robbie": "Scenes/Speurhondenspel/Medium",
-    "pipe": "Scenes/PipeConnectScenes/Hard"
+    "robbie": "Scenes/Speurhondenspel/Hard_Speurhondenspel",
+    "pipe": "Scenes/PipeConnectScenes/Hard",
+    "cardmatch_easy": "Scenes/FindTheMatchScenes/Easy",
 };
 
 export const startGame = async(req: Request, res: Response) => {
@@ -138,6 +139,7 @@ export const startGame = async(req: Request, res: Response) => {
             sessionId, 
             unityScene,
             gameId: gameIdStr,
+            pictureId: pictureData.pictureId,
             gameData: game[0],
             attemptId,
             anonymousId: recipientIdentifier

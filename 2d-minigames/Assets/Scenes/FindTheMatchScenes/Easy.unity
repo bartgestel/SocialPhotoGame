@@ -825,62 +825,24 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.ContentSizeFitter
-  m_HorizontalFit: 0
-  m_VerticalFit: 2
---- !u!1 &1556469390
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1556469397}
-  - component: {fileID: 1556469396}
-  - component: {fileID: 1556469395}
-  - component: {fileID: 1556469394}
-  - component: {fileID: 1556469393}
-  - component: {fileID: 1556469392}
-  - component: {fileID: 1556469391}
-  m_Layer: 5
-  m_Name: CardManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1556469391
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1556469390}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1aa08ab6e0800fa44ae55d278d1423e3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.ScrollRect
-  m_Content: {fileID: 1443047557}
-  m_Horizontal: 0
-  m_Vertical: 1
-  m_MovementType: 1
-  m_Elasticity: 0.1
-  m_Inertia: 1
-  m_DecelerationRate: 0.135
-  m_ScrollSensitivity: 1
-  m_Viewport: {fileID: 165754565}
-  m_HorizontalScrollbar: {fileID: 0}
-  m_VerticalScrollbar: {fileID: 0}
-  m_HorizontalScrollbarVisibility: 0
-  m_VerticalScrollbarVisibility: 0
-  m_HorizontalScrollbarSpacing: 0
-  m_VerticalScrollbarSpacing: 0
-  m_OnValueChanged:
-    m_PersistentCalls:
-      m_Calls: []
---- !u!82 &1556469392
+  m_EditorClassIdentifier: Assembly-CSharp::GameManager
+  cardPrefab: {fileID: 589487466755762432, guid: 4021020a3cb44864e9737bef50ca17a0, type: 3}
+  cardParent: {fileID: 156667423}
+  cardSprites:
+  - {fileID: 5513006527211942390, guid: b00a25213b4ffcd48b594d96474bbce5, type: 3}
+  - {fileID: -3883064623487603212, guid: c14fecee0f54bd14caeeef7abf010531, type: 3}
+  - {fileID: -6130450411971241407, guid: da33173d566f3ef43a0415cd15ee34d5, type: 3}
+  - {fileID: 828259024611676192, guid: 46d4c874538704742b3776ee1a37816a, type: 3}
+  - {fileID: -3277989119616714095, guid: b3d308e574eb7a2458e79be2275e6bf7, type: 3}
+  badCardSprite: {fileID: -5087512607957746697, guid: ebe0065d3d4ac8541a4e040db303b728, type: 3}
+  puzzleGridSize: 3
+  maxPiecesToUse: 5
+  audioSource: {fileID: 156667426}
+  flipSound: {fileID: 0}
+  matchSound: {fileID: 0}
+  winSound: {fileID: 0}
+  loseSound: {fileID: 0}
+--- !u!82 &156667426
 AudioSource:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
