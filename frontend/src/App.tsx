@@ -6,6 +6,8 @@ import Profile from "./pages/Profile";
 import Game from "./pages/Game";
 import UploadPicture from "./pages/UploadPicture";
 import UnlockPicture from "./pages/UnlockPicture";
+import PostOverview from "./pages/PostOverview";
+import PostEdit from "./pages/PostEdit";
 
 export default function App() {
   return (
@@ -19,6 +21,8 @@ export default function App() {
       <Route path="/upload" element={<UploadPicture />} />
       <Route path="/unlock/:shareToken" element={<UnlockPicture />} />
       <Route path="/post/:shareToken" element={<UnlockPicture />} />
+      <Route path="/overview/:postId" element={<PostOverview />} />
+      <Route path="/edit/:postId" element={<PostEdit />} />
     </Routes>
   );
 }

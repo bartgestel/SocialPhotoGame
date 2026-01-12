@@ -98,8 +98,25 @@ export default function UnlockPicture() {
 
   const handlePlayGame = () => {
     if (!pictureInfo || !shareToken) return;
-    // Navigate to game page with shareToken
-    navigate(`/game?shareToken=${shareToken}&anonymousId=${anonymousId}`);
+    // Simulate game completion and unlock picture
+    // In production, this would navigate to actual game or embed it
+    setLoading(true);
+    
+    // Simulate game playing and completion
+    setTimeout(() => {
+      // Mock unlocked picture data - replace with actual API call after game completion
+      const mockUnlockedPicture: UnlockedPicture = {
+        pictureId: pictureInfo.pictureId,
+        mediaUrl: "https://via.placeholder.com/400x600/AF8159/FFFFFF?text=Unlocked+Picture",
+        mediaType: "IMAGE",
+        createdAt: new Date().toISOString(),
+        sender: pictureInfo.sender,
+      };
+      
+      setUnlockedPicture(mockUnlockedPicture);
+      setStep("revealed");
+      setLoading(false);
+    }, 2000); // Simulate 2 second game
   };
 
   const handleGameComplete = (pictureData: UnlockedPicture) => {
@@ -184,8 +201,11 @@ export default function UnlockPicture() {
     return (
       <div className="min-h-screen bg-primary flex items-center justify-center p-8">
         <div className="w-full max-w-sm">
-          {/* Decorative circles pattern */}
-          <div className="relative w-full aspect-[9/16] bg-tertiary rounded-3xl overflow-hidden">
+          {/* Decorative circles pattern - Clickable game area */}
+          <div 
+            onClick={handlePlayGame}
+            className="relative w-full aspect-[9/16] bg-tertiary rounded-3xl overflow-hidden cursor-pointer hover:scale-105 transition-transform"
+          >
             {/* Large circle bottom-left */}
             <div className="absolute -left-20 bottom-0 w-48 h-48 bg-secondary rounded-full"></div>
             
@@ -201,16 +221,6 @@ export default function UnlockPicture() {
             {/* Small circles */}
             <div className="absolute left-12 top-24 w-16 h-16 bg-primary/60 rounded-full"></div>
             <div className="absolute left-20 bottom-32 w-12 h-12 bg-primary/70 rounded-full"></div>
-            
-            {/* Play game button */}
-            <div className="absolute inset-0 flex items-center justify-center">
-              <button
-                onClick={handlePlayGame}
-                className="px-8 py-4 bg-actionButton text-white rounded-3xl font-medium shadow-lg hover:opacity-90 transition-opacity"
-              >
-                Play Game to Reveal
-              </button>
-            </div>
           </div>
         </div>
       </div>
@@ -219,6 +229,11 @@ export default function UnlockPicture() {
 
   // Step 3: Revealed Picture Page
   if (step === "revealed" && unlockedPicture) {
+    const handleNavigateToComments = () => {
+      // Navigate to overview page where they can leave comments
+      navigate(`/overview/${pictureInfo?.pictureId || '1'}`);
+    };
+
     return (
       <div className="min-h-screen bg-primary flex flex-col items-center justify-between p-8 pt-16 pb-8">
         {/* Success Message */}
@@ -230,8 +245,11 @@ export default function UnlockPicture() {
           </p>
         </div>
 
-        {/* Picture Display */}
-        <div className="flex-1 flex items-center justify-center my-8">
+        {/* Picture Display - Clickable */}
+        <div 
+          onClick={handleNavigateToComments}
+          className="flex-1 flex items-center justify-center my-8 cursor-pointer"
+        >
           <div className="w-full max-w-sm aspect-[3/4] bg-white rounded-3xl overflow-hidden shadow-2xl transform rotate-3 hover:rotate-0 transition-transform">
             <img
               src={unlockedPicture.mediaUrl}
