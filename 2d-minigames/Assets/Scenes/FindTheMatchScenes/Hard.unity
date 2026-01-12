@@ -234,47 +234,35 @@ CanvasRenderer:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 329831636}
-  m_CullTransparentMesh: 0
---- !u!224 &329831639
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 329831636}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 82.60999}
-  m_LocalScale: {x: 0.85881567, y: 0.85881567, z: 0.85881567}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1735171699}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 538, y: -63}
-  m_SizeDelta: {x: 1250, y: 150}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!1 &465802168
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 465802172}
-  - component: {fileID: 465802171}
-  - component: {fileID: 465802170}
-  - component: {fileID: 465802169}
-  m_Layer: 5
-  m_Name: LoseScreen
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &465802169
+  m_GameObject: {fileID: 1340730286}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0763558d7ab6fa42bb277151349d167, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameManager
+  cardPrefab: {fileID: 5047815157959846793, guid: 169ce771010dd57408e2b4db35784607, type: 3}
+  cardParent: {fileID: 1340730292}
+  cardSprites:
+  - {fileID: -3883064623487603212, guid: c14fecee0f54bd14caeeef7abf010531, type: 3}
+  - {fileID: 5513006527211942390, guid: b00a25213b4ffcd48b594d96474bbce5, type: 3}
+  - {fileID: -3022031813660989480, guid: 0c277aa3c7bc8ae44bdbffdce9901e25, type: 3}
+  - {fileID: 6122951203603393737, guid: 5e50304446825294ab8ce91566308dea, type: 3}
+  - {fileID: -3277989119616714095, guid: b3d308e574eb7a2458e79be2275e6bf7, type: 3}
+  - {fileID: -6130450411971241407, guid: da33173d566f3ef43a0415cd15ee34d5, type: 3}
+  - {fileID: -6019640822646772751, guid: 8d78f51398bdd784ba03e15322388208, type: 3}
+  - {fileID: 828259024611676192, guid: 46d4c874538704742b3776ee1a37816a, type: 3}
+  - {fileID: 7229594009667741155, guid: d5b0232561eed48469a26d118536c90e, type: 3}
+  - {fileID: 1193491029718968562, guid: bc564db6ba8c42b488fd4a3b6c5b9218, type: 3}
+  - {fileID: 2339289561419798253, guid: ea1ca83409fbe9e4d98592dc9062649d, type: 3}
+  badCardSprite: {fileID: -5087512607957746697, guid: ebe0065d3d4ac8541a4e040db303b728, type: 3}
+  puzzleGridSize: 4
+  maxPiecesToUse: 11
+  audioSource: {fileID: 1340730293}
+  flipSound: {fileID: 0}
+  matchSound: {fileID: 0}
+  winSound: {fileID: 0}
+  loseSound: {fileID: 0}
+--- !u!114 &1340730289
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
