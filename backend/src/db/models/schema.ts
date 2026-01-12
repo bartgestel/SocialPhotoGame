@@ -160,3 +160,13 @@ export const unlockAttempts = pgTable('unlock_attempts', {
 }, (table) => ({
     recipientIdx: index('idx_attempts_by_recipient').on(table.recipientRecordId),
 }));
+
+export const pictureComments = pgTable('picture_comments', {
+    commentId: text('comment_id').primaryKey(),
+    pictureId: text('picture_id').notNull().references(() => pictures.pictureId, { onDelete: 'cascade' }),
+    commenterId: text('commenter_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+    content: text('content').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+}, (table) => ({
+    pictureIdx: index('idx_comments_by_picture').on(table.pictureId),
+}));

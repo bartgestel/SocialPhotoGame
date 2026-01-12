@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Unity, useUnityContext } from "react-unity-webgl";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
+import Comments from "../components/Comments";
 
 // Types
 interface SessionConfig {
@@ -165,6 +166,9 @@ const Game: React.FC = () => {
               {new Date(unlockedPicture.createdAt).toLocaleDateString()}
             </p>
           </div>
+
+          {/* Comments Section */}
+          <Comments pictureId={unlockedPicture.pictureId} />
 
           {shareToken && (
             <button

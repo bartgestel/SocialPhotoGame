@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { authClient } from "../lib/auth-client";
+import UserSearch from "../components/UserSearch";
+import FriendsList from "../components/FriendsList";
+import FriendRequests from "../components/FriendRequests";
+import MyPictures from "../components/MyPictures";
 import pBlobCut from "../assets/app_assets/p_blob_cut.svg";
 import gBlobCut from "../assets/app_assets/g_blob_cut.svg";
 import HomeD from "../assets/app_assets/svg/Home_d.svg";
@@ -297,6 +301,21 @@ export default function Home() {
           </div>
           </main>
         </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
+        {/* My Pictures Section */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold mb-4">My Pictures</h2>
+          <MyPictures />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Search Users Section */}
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <h2 className="text-xl font-semibold mb-4">Find Friends</h2>
+            <UserSearch currentUserId={session.user.id} />
 
         {/* Right Sidebar */}
         <aside className="w-80 bg-tertiary overflow-y-auto px-6 pt-48 pb-8 mr-32 space-y-6 scrollbar-hide">
