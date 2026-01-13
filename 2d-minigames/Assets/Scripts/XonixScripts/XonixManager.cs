@@ -88,11 +88,14 @@ public class XonixManager : MonoBehaviour
 
         Debug.Log($"Found {regions.Count} regions, {regionsWithEnemies.Count} contain enemies");
 
+        int totalDeleted = 0;
+
         foreach (var region in regions)
         {
             if (!regionsWithEnemies.Contains(region))
             {
                 Debug.Log($"Deleting region with {region.Count} blocks");
+                totalDeleted += region.Count;
                 foreach (var block in region)
                 {
                     if (block != null)
@@ -108,6 +111,8 @@ public class XonixManager : MonoBehaviour
             }
         }
 
+        totalDeleted += currentTrail.Count;
+
         foreach (RedBlock red in currentTrail)
         {
             if (red != null)
@@ -115,6 +120,11 @@ public class XonixManager : MonoBehaviour
                 CreateBorderAtPosition(red.transform.position);
                 Destroy(red.gameObject);
             }
+        }
+
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.AddDeletedSquares(totalDeleted);
         }
 
         currentTrail.Clear();

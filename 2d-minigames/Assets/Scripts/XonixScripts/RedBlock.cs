@@ -24,7 +24,7 @@ public class RedBlock : MonoBehaviour
     public void ResetRed()
     {
         if (sr == null) return;
-        sr.color = Color.red;
+        sr.color = Color.white;
         isGreen = false;
     }
 }

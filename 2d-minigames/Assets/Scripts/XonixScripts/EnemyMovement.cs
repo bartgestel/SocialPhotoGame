@@ -5,8 +5,6 @@ public class EnemyMovement : MonoBehaviour
 {
     [Header("Movement Settings")]
     public float speed = 3f;
-    public float turnSpeed = 90f;
-    public bool constantSpin = false;
 
     [Header("Boundary Settings")]
     public Vector2 minBounds = new Vector2(-8f, -4.5f);
@@ -15,10 +13,14 @@ public class EnemyMovement : MonoBehaviour
     [Header("Collision Settings")]
     public Vector2 enemyHalfExtents = new Vector2(0.5f, 0.5f);
     public float borderCheckDistance = 0.1f;
+    public float rotationCooldown = 0.5f;
+    public float minCollisionInterval = 0.2f;
 
     private Rigidbody2D rb;
     private Vector2 moveDirection;
     private BoxCollider2D boxCollider;
+    private float lastRotationTime;
+    private float lastCollisionTime;
 
     private void Awake()
     {
@@ -39,6 +41,9 @@ public class EnemyMovement : MonoBehaviour
             Mathf.Cos(randomAngle * Mathf.Deg2Rad),
             Mathf.Sin(randomAngle * Mathf.Deg2Rad)
         ).normalized;
+
+        lastRotationTime = -rotationCooldown;
+        lastCollisionTime = -minCollisionInterval;
     }
 
     private void FixedUpdate()
@@ -46,8 +51,20 @@ public class EnemyMovement : MonoBehaviour
         Vector2 currentPos = rb.position;
         Vector2 nextPos = currentPos + moveDirection * speed * Time.fixedDeltaTime;
 
-        CheckEnemyCollisions(currentPos, ref moveDirection);
-        CheckBorderCollisions(currentPos, ref moveDirection, ref nextPos);
+        CheckGreenLineCollision(currentPos);
+
+        bool hadCollision = false;
+        hadCollision |= CheckBorderCollisions(currentPos, ref moveDirection, ref nextPos);
+
+        if (CanCollide())
+        {
+            hadCollision |= CheckEnemyCollisions(currentPos, ref moveDirection);
+        }
+
+        if (hadCollision)
+        {
+            lastCollisionTime = Time.time;
+        }
 
         nextPos = currentPos + moveDirection * speed * Time.fixedDeltaTime;
 
@@ -95,35 +112,65 @@ public class EnemyMovement : MonoBehaviour
 
         moveDirection = moveDirection.normalized;
 
-        if (bounced)
+        if (bounced && CanRotate())
         {
             float randomAngle = Random.Range(-10f, 10f);
             moveDirection = Rotate(moveDirection, randomAngle).normalized;
-
-            if (!constantSpin)
-            {
-                float angle = Mathf.Atan2(moveDirection.y, moveDirection.x) * Mathf.Rad2Deg;
-                rb.rotation = angle;
-            }
+            UpdateRotation();
+            lastRotationTime = Time.time;
         }
 
         rb.MovePosition(nextPos);
+    }
 
-        if (constantSpin)
+    private bool CanRotate()
+    {
+        return Time.time - lastRotationTime >= rotationCooldown;
+    }
+
+    private bool CanCollide()
+    {
+        return Time.time - lastCollisionTime >= minCollisionInterval;
+    }
+
+    private void UpdateRotation()
+    {
+        float angle = Mathf.Atan2(moveDirection.y, moveDirection.x) * Mathf.Rad2Deg;
+        rb.rotation = angle;
+    }
+
+    private void CheckGreenLineCollision(Vector2 currentPos)
+    {
+        Collider2D[] hitColliders = Physics2D.OverlapBoxAll(
+            currentPos,
+            enemyHalfExtents * 2f,
+            rb.rotation
+        );
+
+        foreach (Collider2D col in hitColliders)
         {
-            float currentRotation = rb.rotation;
-            rb.rotation = currentRotation + turnSpeed * Time.fixedDeltaTime;
+            if (col.gameObject == gameObject) continue;
+
+            RedBlock redBlock = col.GetComponent<RedBlock>();
+            if (redBlock != null && redBlock.isGreen)
+            {
+                if (UIManager.Instance != null)
+                {
+                    UIManager.Instance.PlayerDied();
+                }
+                break;
+            }
         }
     }
 
-    private void CheckBorderCollisions(Vector2 currentPos, ref Vector2 direction, ref Vector2 nextPos)
+    private bool CheckBorderCollisions(Vector2 currentPos, ref Vector2 direction, ref Vector2 nextPos)
     {
         Vector2 effectiveHalfExtents = GetEffectiveHalfExtents();
         Vector2 checkPos = currentPos + direction * (speed * Time.fixedDeltaTime + borderCheckDistance);
 
         Collider2D[] hitColliders = Physics2D.OverlapBoxAll(
             checkPos,
-            effectiveHalfExtents * 2f,
+            effectiveHalfExtents * 2.2f,
             rb.rotation
         );
 
@@ -133,16 +180,15 @@ public class EnemyMovement : MonoBehaviour
             if (!col.CompareTag("Border")) continue;
 
             Vector2 enemyPos = currentPos;
-            Vector2 borderPos = col.transform.position;
             Vector2 closestPoint = col.ClosestPoint(enemyPos);
             Vector2 normal = (enemyPos - closestPoint).normalized;
 
-            if (normal == Vector2.zero)
+            if (normal.magnitude < 0.1f)
             {
-                Vector2 toBorder = borderPos - enemyPos;
+                Vector2 toBorder = enemyPos - (Vector2)col.transform.position;
                 if (toBorder.magnitude > 0.01f)
                 {
-                    normal = -toBorder.normalized;
+                    normal = toBorder.normalized;
                 }
                 else
                 {
@@ -152,20 +198,22 @@ public class EnemyMovement : MonoBehaviour
 
             direction = Vector2.Reflect(direction, normal).normalized;
 
-            float randomAngle = Random.Range(-10f, 10f);
-            direction = Rotate(direction, randomAngle).normalized;
-
-            if (!constantSpin)
+            if (CanRotate())
             {
-                float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-                rb.rotation = angle;
+                float randomAngle = Random.Range(-10f, 10f);
+                direction = Rotate(direction, randomAngle).normalized;
+                UpdateRotation();
+                lastRotationTime = Time.time;
             }
 
-            Vector2 pushBack = normal * 0.1f;
+            float maxExtent = Mathf.Max(effectiveHalfExtents.x, effectiveHalfExtents.y);
+            Vector2 pushBack = normal * (maxExtent + 0.2f);
             nextPos = currentPos + pushBack;
 
-            break;
+            return true;
         }
+
+        return false;
     }
 
     private Vector2 GetEffectiveHalfExtents()
@@ -180,8 +228,10 @@ public class EnemyMovement : MonoBehaviour
         return new Vector2(width, height);
     }
 
-    private void CheckEnemyCollisions(Vector2 currentPos, ref Vector2 direction)
+    private bool CheckEnemyCollisions(Vector2 currentPos, ref Vector2 direction)
     {
+        if (!CanCollide()) return false;
+
         GameObject[] allEnemies = GameObject.FindGameObjectsWithTag("Enemy");
 
         foreach (GameObject enemyObj in allEnemies)
@@ -200,12 +250,12 @@ public class EnemyMovement : MonoBehaviour
             {
                 float thisMaxExtent = Mathf.Max(enemyHalfExtents.x, enemyHalfExtents.y);
                 float otherMaxExtent = Mathf.Max(otherEnemy.enemyHalfExtents.x, otherEnemy.enemyHalfExtents.y);
-                combinedDistance = thisMaxExtent + otherMaxExtent;
+                combinedDistance = thisMaxExtent + otherMaxExtent + 0.2f;
             }
             else
             {
                 float thisSize = Mathf.Max(enemyHalfExtents.x, enemyHalfExtents.y);
-                combinedDistance = thisSize + 0.5f;
+                combinedDistance = thisSize + 0.7f;
             }
 
             if (distance < combinedDistance && distance > 0.01f)
@@ -213,21 +263,22 @@ public class EnemyMovement : MonoBehaviour
                 Vector2 normal = -toOther.normalized;
                 direction = Vector2.Reflect(direction, normal).normalized;
 
-                float randomAngle = Random.Range(-15f, 15f);
-                direction = Rotate(direction, randomAngle).normalized;
-
-                if (!constantSpin)
+                if (CanRotate())
                 {
-                    float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
-                    rb.rotation = angle;
+                    float randomAngle = Random.Range(-15f, 15f);
+                    direction = Rotate(direction, randomAngle).normalized;
+                    UpdateRotation();
+                    lastRotationTime = Time.time;
                 }
 
-                Vector2 separation = normal * (combinedDistance - distance) * 0.5f;
+                Vector2 separation = normal * (combinedDistance - distance + 0.3f);
                 rb.MovePosition(rb.position + separation);
 
-                break;
+                return true;
             }
         }
+
+        return false;
     }
 
     private Vector2 Rotate(Vector2 v, float degrees)
