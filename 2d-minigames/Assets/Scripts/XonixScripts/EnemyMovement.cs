@@ -14,6 +14,7 @@ public class EnemyMovement : MonoBehaviour
 
     [Header("Collision Settings")]
     public Vector2 enemyHalfExtents = new Vector2(0.5f, 0.5f);
+    public float borderCheckDistance = 0.1f;
 
     private Rigidbody2D rb;
     private Vector2 moveDirection;
@@ -46,6 +47,7 @@ public class EnemyMovement : MonoBehaviour
         Vector2 nextPos = currentPos + moveDirection * speed * Time.fixedDeltaTime;
 
         CheckEnemyCollisions(currentPos, ref moveDirection);
+        CheckBorderCollisions(currentPos, ref moveDirection, ref nextPos);
 
         nextPos = currentPos + moveDirection * speed * Time.fixedDeltaTime;
 
@@ -111,6 +113,58 @@ public class EnemyMovement : MonoBehaviour
         {
             float currentRotation = rb.rotation;
             rb.rotation = currentRotation + turnSpeed * Time.fixedDeltaTime;
+        }
+    }
+
+    private void CheckBorderCollisions(Vector2 currentPos, ref Vector2 direction, ref Vector2 nextPos)
+    {
+        Vector2 effectiveHalfExtents = GetEffectiveHalfExtents();
+        Vector2 checkPos = currentPos + direction * (speed * Time.fixedDeltaTime + borderCheckDistance);
+
+        Collider2D[] hitColliders = Physics2D.OverlapBoxAll(
+            checkPos,
+            effectiveHalfExtents * 2f,
+            rb.rotation
+        );
+
+        foreach (Collider2D col in hitColliders)
+        {
+            if (col.gameObject == gameObject) continue;
+            if (!col.CompareTag("Border")) continue;
+
+            Vector2 enemyPos = currentPos;
+            Vector2 borderPos = col.transform.position;
+            Vector2 closestPoint = col.ClosestPoint(enemyPos);
+            Vector2 normal = (enemyPos - closestPoint).normalized;
+
+            if (normal == Vector2.zero)
+            {
+                Vector2 toBorder = borderPos - enemyPos;
+                if (toBorder.magnitude > 0.01f)
+                {
+                    normal = -toBorder.normalized;
+                }
+                else
+                {
+                    normal = -direction;
+                }
+            }
+
+            direction = Vector2.Reflect(direction, normal).normalized;
+
+            float randomAngle = Random.Range(-10f, 10f);
+            direction = Rotate(direction, randomAngle).normalized;
+
+            if (!constantSpin)
+            {
+                float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
+                rb.rotation = angle;
+            }
+
+            Vector2 pushBack = normal * 0.1f;
+            nextPos = currentPos + pushBack;
+
+            break;
         }
     }
 

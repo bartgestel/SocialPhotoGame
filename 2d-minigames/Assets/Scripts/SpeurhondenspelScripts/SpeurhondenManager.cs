@@ -11,7 +11,7 @@ public class SpeurhondenManager : MonoBehaviour
     private bool isGameOver = false;
     private Vector3 lastCheckpoint;
 
-    public int gridSize = 2; // 2x2 grid for puzzle pieces
+    public int gridSize = 2; 
 
     private void Awake()
     {
@@ -23,19 +23,15 @@ public class SpeurhondenManager : MonoBehaviour
         Instance = this;
         deathPanel.SetActive(false);
         
-        // Load puzzle pieces if this is a puzzle game
         LoadPuzzlePiecesIfNeeded();
     }
 
     private void LoadPuzzlePiecesIfNeeded()
     {
-        // Check if GameCoordinator has a pictureId (meaning this is a puzzle game)
         if (GameCoordinatorScript.Instance != null)
         {
             string gameId = GameCoordinatorScript.Instance.CurrentGameId;
             
-            // You can check if this specific game should use puzzle pieces
-            // For now, we'll always try to load if we have a pictureId from PlayerPrefs
             string pictureId = PlayerPrefs.GetString("CurrentPictureId", "");
             
             if (!string.IsNullOrEmpty(pictureId))
@@ -43,10 +39,9 @@ public class SpeurhondenManager : MonoBehaviour
                 Debug.Log($"Loading puzzle pieces for picture: {pictureId}");
                 PuzzlePieceLoader loader = gameObject.AddComponent<PuzzlePieceLoader>();
                 
-                // Set consistent pixel size for all pieces
-                loader.targetPixelWidth = 128;  // All pieces will be 128x128 pixels
+                loader.targetPixelWidth = 128;
                 loader.targetPixelHeight = 128;
-                loader.pixelsPerUnit = 100f;    // Adjust this to control world size
+                loader.pixelsPerUnit = 100f;    
                 
                 loader.LoadPuzzlePieces(pictureId, gridSize, OnPuzzlePiecesLoaded);
             }
@@ -63,12 +58,10 @@ public class SpeurhondenManager : MonoBehaviour
 
         Debug.Log($"Successfully loaded {pieces.Length} puzzle pieces");
 
-        // Find all bone pickups in the scene
         BonePickup[] bones = FindObjectsOfType<BonePickup>();
         
         Debug.Log($"Found {bones.Length} bones to replace with puzzle pieces");
 
-        // Replace bone sprites with puzzle pieces
         for (int i = 0; i < bones.Length && i < pieces.Length; i++)
         {
             SpriteRenderer spriteRenderer = bones[i].GetComponent<SpriteRenderer>();
@@ -93,12 +86,21 @@ public class SpeurhondenManager : MonoBehaviour
         if (!isGameOver) return;
         isGameOver = false;
         Time.timeScale = 1f;
+
         PlayerController player = FindObjectOfType<PlayerController>();
         if (player != null)
         {
             player.transform.position = lastCheckpoint;
             player.ResetMovement();
         }
+
+        ResettableObject[] resettables = FindObjectsOfType<ResettableObject>();
+
+        foreach (ResettableObject resettable in resettables)
+        {
+            resettable.ResetPosition();
+        }
+
         if (deathPanel != null)
             deathPanel.SetActive(false);
     }
