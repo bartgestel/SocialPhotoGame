@@ -1,6 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { api } from "../lib/api";
 import { useNavigate } from "react-router-dom";
+
+type GameDifficulty = {
+  level: string;
+  gameId: number;
+  assetBundleUrl: string | null;
+  hasPieces: boolean;
+  gridSize: number;
+};
+
+type Game = {
+  name: string;
+  description: string | null;
+  difficulties: GameDifficulty[];
+};
 
 export default function UploadPicture() {
   const navigate = useNavigate();
@@ -8,13 +22,54 @@ export default function UploadPicture() {
   const [preview, setPreview] = useState<string>("");
   const [title, setTitle] = useState<string>("");
   const [description, setDescription] = useState<string>("");
-  const [gameId, setGameId] = useState<string>("1");
-  const [difficulty, setDifficulty] = useState<string>("medium");
+  const [games, setGames] = useState<Game[]>([]);
+  const [selectedGameName, setSelectedGameName] = useState<string>("");
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>("");
+  const [gameId, setGameId] = useState<string>("");
   const [maxUnlocks, setMaxUnlocks] = useState<string>("0");
   const [expiresInDays, setExpiresInDays] = useState<string>("7");
   const [loading, setLoading] = useState(false);
   const [shareLink, setShareLink] = useState<string>("");
   const [error, setError] = useState<string>("");
+
+  useEffect(() => {
+    const fetchGames = async () => {
+      try {
+        const result = await api.getActiveGames();
+        setGames(result.games);
+      } catch (err) {
+        console.error('Failed to fetch games:', err);
+      }
+    };
+    fetchGames();
+  }, []);
+
+  // When game name changes, reset difficulty and gameId
+  useEffect(() => {
+    if (selectedGameName) {
+      const game = games.find(g => g.name === selectedGameName);
+      if (game && game.difficulties.length > 0) {
+        // Auto-select first difficulty
+        const firstDifficulty = game.difficulties[0];
+        setSelectedDifficulty(firstDifficulty.level);
+        setGameId(String(firstDifficulty.gameId));
+      }
+    } else {
+      setSelectedDifficulty("");
+      setGameId("");
+    }
+  }, [selectedGameName, games]);
+
+  // When difficulty changes, update gameId
+  useEffect(() => {
+    if (selectedGameName && selectedDifficulty) {
+      const game = games.find(g => g.name === selectedGameName);
+      const difficulty = game?.difficulties.find(d => d.level === selectedDifficulty);
+      if (difficulty) {
+        setGameId(String(difficulty.gameId));
+      }
+    }
+  }, [selectedDifficulty, selectedGameName, games]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0];
@@ -133,6 +188,9 @@ export default function UploadPicture() {
                 setPreview("");
                 setTitle("");
                 setDescription("");
+                setSelectedGameName("");
+                setSelectedDifficulty("");
+                setGameId("");
               }}
               className="flex-1 px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl hover:bg-white/30 transition-colors font-medium"
             >
@@ -221,15 +279,16 @@ export default function UploadPicture() {
           <div>
             <label className="block text-sm font-medium text-secondary mb-2">Select game</label>
             <select
-              value={gameId}
-              onChange={(e) => setGameId(e.target.value)}
-              className="w-24 h-24 bg-gray-300 rounded-2xl border-none outline-none text-secondary text-center appearance-none cursor-pointer flex items-center justify-center"
+              value={selectedGameName}
+              onChange={(e) => setSelectedGameName(e.target.value)}
+              className="w-full px-4 py-3 bg-white rounded-2xl border-none outline-none text-secondary appearance-none cursor-pointer text-center"
             >
-              <option value="">Choose</option>
-              <option value="1">Robbie</option>
-              <option value="2">Pipe Connect</option>
-              <option value="3">Quick Math</option>
-              <option value="2">Find the Match</option>
+              <option value="">Choose a game</option>
+              {games.map((game) => (
+                <option key={game.name} value={game.name}>
+                  {game.name.charAt(0).toUpperCase() + game.name.slice(1)}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -237,13 +296,17 @@ export default function UploadPicture() {
           <div>
             <label className="block text-sm font-medium text-secondary mb-2">Difficulty</label>
             <select
-              value={difficulty}
-              onChange={(e) => setDifficulty(e.target.value)}
-              className="w-full px-4 py-3 bg-white rounded-2xl border-none outline-none text-secondary appearance-none cursor-pointer text-center"
+              value={selectedDifficulty}
+              onChange={(e) => setSelectedDifficulty(e.target.value)}
+              disabled={!selectedGameName}
+              className="w-full px-4 py-3 bg-white rounded-2xl border-none outline-none text-secondary appearance-none cursor-pointer text-center disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <option value="easy">Easy</option>
-              <option value="medium">Medium</option>
-              <option value="hard">Hard</option>
+              <option value="">Choose difficulty</option>
+              {selectedGameName && games.find(g => g.name === selectedGameName)?.difficulties.map((diff) => (
+                <option key={diff.level} value={diff.level}>
+                  {diff.level.charAt(0) + diff.level.slice(1).toLowerCase()}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -332,27 +395,33 @@ export default function UploadPicture() {
                 <div>
                   <label className="block text-sm font-medium text-secondary mb-2">Game</label>
                   <select
-                    value={gameId}
-                    onChange={(e) => setGameId(e.target.value)}
+                    value={selectedGameName}
+                    onChange={(e) => setSelectedGameName(e.target.value)}
                     className="w-full px-4 py-2 bg-tertiary rounded-xl border-none outline-none text-secondary"
                   >
                     <option value="">Choose game</option>
-                    <option value="1">Robbie</option>
-                    <option value="2">Pipe Connect</option>
-                    <option value="3">Quick Math</option>
+                    {games.map((game) => (
+                      <option key={game.name} value={game.name}>
+                        {game.name.charAt(0).toUpperCase() + game.name.slice(1)}
+                      </option>
+                    ))}
                   </select>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-secondary mb-2">Difficulty</label>
                   <select
-                    value={difficulty}
-                    onChange={(e) => setDifficulty(e.target.value)}
-                    className="w-full px-4 py-2 bg-tertiary rounded-xl border-none outline-none text-secondary"
+                    value={selectedDifficulty}
+                    onChange={(e) => setSelectedDifficulty(e.target.value)}
+                    disabled={!selectedGameName}
+                    className="w-full px-4 py-2 bg-tertiary rounded-xl border-none outline-none text-secondary disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    <option value="easy">Easy</option>
-                    <option value="medium">Medium</option>
-                    <option value="hard">Hard</option>
+                    <option value="">Choose difficulty</option>
+                    {selectedGameName && games.find(g => g.name === selectedGameName)?.difficulties.map((diff) => (
+                      <option key={diff.level} value={diff.level}>
+                        {diff.level.charAt(0) + diff.level.slice(1).toLowerCase()}
+                      </option>
+                    ))}
                   </select>
                 </div>
               </div>

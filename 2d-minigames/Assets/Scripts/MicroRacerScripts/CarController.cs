@@ -123,6 +123,11 @@ public class CarController : MonoBehaviour
 
     public void FinishRace()
     {
+        if (GameCoordinatorScript.Instance != null)
+        {
+            GameCoordinatorScript.Instance.TriggerWin();
+        }
+
         finished = true;
         speed = 0f;
         turnSpeed = 0f;

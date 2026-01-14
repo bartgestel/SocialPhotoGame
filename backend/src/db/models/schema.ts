@@ -7,6 +7,7 @@ import { number } from "better-auth";
 // --------------------------------------------------------------------------------
 export const friendshipStatusEnum = pgEnum('friendship_status', ['PENDING', 'ACCEPTED', 'BLOCKED']);
 export const pictureStatusEnum = pgEnum('picture_status', ['LOCKED', 'UNLOCKED', 'VIEWED', 'EXPIRED']);
+export const difficultyEnum = pgEnum('difficulty_level', ['EASY', 'MEDIUM', 'HARD', 'EXPERT']);
 
 // --------------------------------------------------------------------------------
 // 2. AUTHENTICATION TABLES (From your provided schema)
@@ -95,7 +96,7 @@ export const games = pgTable('games', {
     gameId: integer('game_id').primaryKey().generatedAlwaysAsIdentity(),
     name: text('name').notNull(), // Changed varchar to text for consistency, though varchar is fine
     description: text('description'),
-    difficultyLevel: integer('difficulty_level').default(1),
+    difficultyLevel: difficultyEnum('difficulty_level').default('EASY'),
     assetBundleUrl: text('asset_bundle_url'),
     isActive: boolean('is_active').default(true),
     hasPieces: boolean('has_pieces').default(false),

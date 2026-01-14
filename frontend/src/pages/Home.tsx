@@ -1,10 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { authClient } from "../lib/auth-client";
-import UserSearch from "../components/UserSearch";
-import FriendsList from "../components/FriendsList";
-import FriendRequests from "../components/FriendRequests";
-import MyPictures from "../components/MyPictures";
 import pBlobCut from "../assets/app_assets/p_blob_cut.svg";
 import gBlobCut from "../assets/app_assets/g_blob_cut.svg";
 import HomeD from "../assets/app_assets/svg/Home_d.svg";
@@ -95,15 +91,7 @@ export default function Home() {
           {/* Mobile Content - Scrollable Feed */}
           <main className="flex-1 overflow-y-auto px-4 py-6 pb-20 space-y-4">
           {/* New Photo Filters Card */}
-          {/* <div className="bg-purple-600 text-white rounded-2xl p-6 flex items-center justify-between min-h-[100px] relative overflow-hidden">
-            <span className="text-lg font-medium z-10">New Photo Filters</span>
-            <div className="absolute right-4 top-4">
-              <div className="w-16 h-16 bg-white/20 rounded-full"></div>
-              <div className="absolute top-8 right-8 w-12 h-12 bg-purple-400/40 rounded-full"></div>
-              <div className="absolute -top-4 -right-4 w-20 h-20 bg-white/30 rounded-full"></div>
-            </div>
-          </div> */}
-              <div className="bg-[#5C4890] text-white rounded-2xl p-6 flex items-center justify-between min-h-[100px] relative overflow-hidden shadow-card">
+          <div className="bg-[#5C4890] text-white rounded-2xl p-6 flex items-center justify-between min-h-[100px] relative overflow-hidden shadow-card">
                <span className="text-base font-medium z-10 self-end -mb-2">New Photo Filters</span>
               <div className="absolute -right-3 -top-5">
                 <img src={pBlobCut} alt="New Photo Filters" className="w-36 h-36" />
@@ -133,12 +121,6 @@ export default function Home() {
           <div className="bg-primary text-white rounded-2xl p-2 shadow-card">
             <span className="text-sm">"Gender reveal" has been revealed 45 times</span>
           </div>
-
-          {/* Friend Requests - Mobile */}
-          {/* <div className="bg-purple-500 text-white rounded-2xl p-4">
-            <h3 className="text-sm font-semibold mb-2">Friend Requests</h3>
-            <FriendRequests />
-          </div> */}
         </main>
 
         {/* Mobile Bottom Navigation */}
@@ -301,21 +283,6 @@ export default function Home() {
           </div>
           </main>
         </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
-        {/* My Pictures Section */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">My Pictures</h2>
-          <MyPictures />
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Search Users Section */}
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <h2 className="text-xl font-semibold mb-4">Find Friends</h2>
-            <UserSearch currentUserId={session.user.id} />
 
         {/* Right Sidebar */}
         <aside className="w-80 bg-tertiary overflow-y-auto px-6 pt-48 pb-8 mr-32 space-y-6 scrollbar-hide">

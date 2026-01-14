@@ -1,7 +1,13 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../lib/api";
 import envelopeIcon from "../assets/app_assets/envelope.svg";
+
+declare global {
+  interface Window {
+    handleUnityGameComplete?: (result: any) => void;
+  }
+}
 
 interface PictureInfo {
   pictureId: string;
@@ -40,6 +46,9 @@ export default function UnlockPicture() {
   const [unlockedPicture, setUnlockedPicture] = useState<UnlockedPicture | null>(null);
   const [anonymousId, setAnonymousId] = useState<string>("");
   const [step, setStep] = useState<"landing" | "game" | "revealed">("landing");
+  const [gameSessionId, setGameSessionId] = useState<string>("");
+  const [unityScene, setUnityScene] = useState<string>("");
+  const iframeRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
     // Get or create anonymous ID from localStorage
@@ -57,6 +66,32 @@ export default function UnlockPicture() {
 
     loadPictureInfo();
   }, [shareToken]);
+
+  // Listen for Unity game completion
+  useEffect(() => {
+    window.handleUnityGameComplete = async (result: any) => {
+      if (result.success && result.pictureUnlocked && result.picture) {
+        setUnlockedPicture(result.picture);
+        setStep("revealed");
+      } else {
+        setError("Failed to unlock picture");
+      }
+    };
+
+    return () => {
+      delete window.handleUnityGameComplete;
+    };
+  }, []);
+
+  // Auto-focus iframe when game loads
+  useEffect(() => {
+    if (step === "game" && unityScene && iframeRef.current) {
+      const timer = setTimeout(() => {
+        iframeRef.current?.focus();
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [step, unityScene]);
 
   const loadPictureInfo = async () => {
     if (!shareToken) return;
@@ -92,8 +127,26 @@ export default function UnlockPicture() {
     }
   };
 
-  const handleOpenEnvelope = () => {
-    setStep("game");
+  const handleOpenEnvelope = async () => {
+    if (!pictureInfo || !shareToken) return;
+    
+    try {
+      setLoading(true);
+      // Start the game session
+      const gameData = await api.startGame(
+        String(pictureInfo.requiredGameId),
+        shareToken,
+        anonymousId
+      );
+      
+      setGameSessionId(gameData.sessionId);
+      setUnityScene(gameData.unityScene);
+      setStep("game");
+    } catch (err: any) {
+      setError(err.message || "Failed to start game");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handlePlayGame = () => {
@@ -199,28 +252,40 @@ export default function UnlockPicture() {
   // Step 2: Game Playing Page
   if (step === "game") {
     return (
-      <div className="min-h-screen bg-primary flex items-center justify-center p-8">
-        <div className="w-full max-w-sm">
-          {/* Decorative circles pattern - Clickable game area */}
-          <div 
-            onClick={handlePlayGame}
-            className="relative w-full aspect-[9/16] bg-tertiary rounded-3xl overflow-hidden cursor-pointer hover:scale-105 transition-transform"
-          >
-            {/* Large circle bottom-left */}
-            <div className="absolute -left-20 bottom-0 w-48 h-48 bg-secondary rounded-full"></div>
+      <div className="min-h-screen bg-primary flex items-center justify-center p-0 md:p-4">
+        <div className="w-full h-screen md:w-[95vw] md:h-[90vh] md:max-h-[900px]">
+          {/* Unity WebGL Game Container */}
+          <div className="relative w-full h-full bg-tertiary md:rounded-3xl overflow-hidden md:shadow-2xl">
+            {/* Decorative circles as background (behind Unity) - hidden on mobile */}
+            <div className="hidden md:block absolute -left-20 bottom-0 w-48 h-48 bg-secondary rounded-full"></div>
+            <div className="hidden md:block absolute -right-12 bottom-12 w-40 h-40 bg-primary rounded-full"></div>
+            <div className="hidden md:block absolute -right-16 -top-12 w-64 h-64 bg-secondary/80 rounded-full"></div>
+            <div className="hidden md:block absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-secondary/70 rounded-full"></div>
+            <div className="hidden md:block absolute left-12 top-24 w-16 h-16 bg-primary/60 rounded-full"></div>
+            <div className="hidden md:block absolute left-20 bottom-32 w-12 h-12 bg-primary/70 rounded-full"></div>
             
-            {/* Medium circle bottom-right */}
-            <div className="absolute -right-12 bottom-12 w-40 h-40 bg-primary rounded-full"></div>
+            {/* Unity Game iFrame */}
+            {unityScene && (
+              <iframe
+                ref={iframeRef}
+                src={`/unity-game?scene=${encodeURIComponent(unityScene)}&sessionId=${gameSessionId}&gameId=${pictureInfo.requiredGameId}&pictureId=${pictureInfo.pictureId}`}
+                className="absolute inset-0 w-full h-full border-none z-10"
+                title="Game"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; gamepad; xr-spatial-tracking"
+                allowFullScreen
+                tabIndex={0}
+              />
+            )}
             
-            {/* Large circle top-right */}
-            <div className="absolute -right-16 -top-12 w-64 h-64 bg-secondary/80 rounded-full"></div>
-            
-            {/* Medium circle center */}
-            <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-secondary/70 rounded-full"></div>
-            
-            {/* Small circles */}
-            <div className="absolute left-12 top-24 w-16 h-16 bg-primary/60 rounded-full"></div>
-            <div className="absolute left-20 bottom-32 w-12 h-12 bg-primary/70 rounded-full"></div>
+            {/* Loading state while Unity initializes */}
+            {!unityScene && (
+              <div className="absolute inset-0 flex items-center justify-center z-10">
+                <div className="text-center text-white">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
+                  <p>Loading game...</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -9,6 +9,7 @@ import UnlockPicture from "./pages/UnlockPicture";
 import PostOverview from "./pages/PostOverview";
 import PostEdit from "./pages/PostEdit";
 import PuzzleTest from "./pages/PuzzleTest";
+import UnityGame from "./pages/UnityGame";
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
       <Route path="/overview/:postId" element={<PostOverview />} />
       <Route path="/edit/:postId" element={<PostEdit />} />
       <Route path="/puzzle-test" element={<PuzzleTest />} />
+      <Route path="/unity-game" element={<UnityGame />} />
     </Routes>
   );
 }

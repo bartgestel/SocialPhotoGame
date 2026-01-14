@@ -7,13 +7,6 @@ import crypto from "crypto";
 const SECRET_KEY = process.env.GAME_SECRET_KEY || "A64814991BEEC14ED7747FE2E1AFD";
 const activeSessions = new Map<string, { gameId: string, shareToken?: string, recipientRecordId?: string }>();
 
-const GAME_SCENE_MAP: Record<string, string> = {
-    "quickmath": "Scenes/QuickMathScenes/QuickMathScene",
-    "robbie": "Scenes/Speurhondenspel/Hard_Speurhondenspel",
-    "pipe": "Scenes/PipeConnectScenes/Hard",
-    "cardmatch_easy": "Scenes/FindTheMatchScenes/Easy",
-};
-
 export const startGame = async(req: Request, res: Response) => {
     const { gameId, shareToken, anonymousId } = req.body;
     
@@ -119,7 +112,8 @@ export const startGame = async(req: Request, res: Response) => {
 
         const sessionId = crypto.randomBytes(16).toString("hex");
         const gameIdStr = String(game[0].gameId);
-        const unityScene = GAME_SCENE_MAP[game[0].name.toLowerCase()] || game[0].name;
+        // Use assetBundleUrl from database, fallback to game name if not set
+        const unityScene = game[0].assetBundleUrl || game[0].name;
 
         activeSessions.set(sessionId, { 
             gameId: gameIdStr, 
@@ -157,7 +151,8 @@ export const startGame = async(req: Request, res: Response) => {
 
     const sessionId = crypto.randomBytes(16).toString("hex");
     const gameIdStr = String(game[0]?.gameId);
-    const unityScene = GAME_SCENE_MAP[gameId.toLowerCase()] || game[0]?.name;
+    // Use assetBundleUrl from database, fallback to game name if not set
+    const unityScene = game[0]?.assetBundleUrl || game[0]?.name;
 
     activeSessions.set(sessionId, { gameId: gameIdStr });
 
@@ -275,3 +270,52 @@ export const verifyGame = async(req: Request, res: Response) => {
         return res.status(403).json({ error: "Verification failed" });
     }
 }
+
+export const getActiveGames = async(req: Request, res: Response) => {
+    const activeGames = await db
+        .select()
+        .from(games)
+        .where(eq(games.isActive, true));
+
+    // Group games by name and collect their difficulties
+    const gameMap = new Map<string, {
+        name: string;
+        description: string | null;
+        difficulties: Array<{
+            level: string;
+            gameId: number;
+            assetBundleUrl: string | null;
+            hasPieces: boolean;
+            gridSize: number;
+        }>;
+    }>();
+
+    activeGames.forEach(game => {
+        if (!gameMap.has(game.name)) {
+            gameMap.set(game.name, {
+                name: game.name,
+                description: game.description,
+                difficulties: []
+            });
+        }
+        
+        gameMap.get(game.name)!.difficulties.push({
+            level: game.difficultyLevel || 'EASY',
+            gameId: game.gameId,
+            assetBundleUrl: game.assetBundleUrl,
+            hasPieces: game.hasPieces || false,
+            gridSize: game.gridSize || 0
+        });
+    });
+
+    // Convert map to array and sort difficulties
+    const groupedGames = Array.from(gameMap.values()).map(game => ({
+        ...game,
+        difficulties: game.difficulties.sort((a, b) => {
+            const order = { 'EASY': 1, 'MEDIUM': 2, 'HARD': 3, 'EXPERT': 4 };
+            return (order[a.level as keyof typeof order] || 99) - (order[b.level as keyof typeof order] || 99);
+        })
+    }));
+
+    res.status(200).json({ games: groupedGames });
+}   

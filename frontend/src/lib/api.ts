@@ -132,4 +132,15 @@ export const api = {
         }
         return response.json();
     },
+
+    getActiveGames: async () => {
+        const response = await fetch(`${API_BASE_URL}/api/games/active`, {
+            credentials: 'include',
+        });
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Failed to fetch games');
+        }
+        return response.json();
+    },
 };

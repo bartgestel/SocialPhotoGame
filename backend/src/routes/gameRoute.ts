@@ -1,5 +1,5 @@
 import { Router, type Router as RouterType } from "express";
-import { startGame, verifyGame } from "../controllers/gameController.js";
+import { startGame, verifyGame, getActiveGames } from "../controllers/gameController.js";
 import { requireAuth } from "../middleware/requireAuth.js";
 
 const router: RouterType = Router();
@@ -8,5 +8,6 @@ const router: RouterType = Router();
 // Path ("/") -> Middleware (requireAuth) -> Controller (createPost)
 router.post("/start", startGame);
 router.post("/verify", verifyGame);
+router.get("/active", getActiveGames);
 
 export default router;
