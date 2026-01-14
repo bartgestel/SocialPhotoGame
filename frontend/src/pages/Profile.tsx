@@ -35,11 +35,6 @@ export default function Profile() {
     return () => window.removeEventListener('resize', checkScreenSize);
   }, [navigate]);
 
-  const handleSignOut = async () => {
-    await authClient.signOut();
-    navigate("/signin");
-  };
-
   const handleShare = (postId: number) => {
     setSelectedPostId(postId);
     setShareModalOpen(true);
@@ -105,7 +100,7 @@ export default function Profile() {
         <header className="bg-background px-4 py-3 pt-14 relative">
           {/* Settings Icon */}
           <button
-            onClick={handleSignOut}
+            onClick={() => navigate("/settings")}
             className="absolute top-14 right-4 p-2"
           >
             <svg className="w-8 h-8 text-secondary" fill="currentColor" viewBox="0 0 24 24">
@@ -343,7 +338,7 @@ export default function Profile() {
           <div className="flex justify-between items-start mb-8">
             <h1 className="text-3xl font-bold text-secondary">Profile</h1>
             <button
-              onClick={handleSignOut}
+              onClick={() => navigate("/settings")}
               className="p-2 hover:bg-tertiary rounded-full"
             >
               <svg className="w-6 h-6 text-secondary" fill="currentColor" viewBox="0 0 24 24">

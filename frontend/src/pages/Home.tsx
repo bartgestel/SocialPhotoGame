@@ -24,11 +24,6 @@ export default function Home() {
     }
   }, [session, isPending, navigate]);
 
-  const handleSignOut = async () => {
-    await authClient.signOut();
-    navigate("/signin");
-  };
-
   const handleShareClick = (postId: number) => {
     setSelectedPostId(postId);
     setShareModalOpen(true);
@@ -191,7 +186,7 @@ export default function Home() {
               </button>
               
               <button
-                onClick={() => handleSignOut()}
+                onClick={() => navigate("/settings")}
                 className="w-full text-left px-3 py-2 rounded-lg hover:bg-tertiary transition-colors flex items-center gap-3"
               >
                 <svg className="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 24 24">
@@ -236,12 +231,12 @@ export default function Home() {
 
             {/* Action Buttons */}
             <div className="flex gap-4 justify-center mt-4 mb-8">
-              <button className="p-3 hover:bg-white/50 rounded-full transition-colors">
+              <button onClick={() => navigate("/edit/1")} className="p-3 hover:bg-white/50 rounded-full transition-colors">
                 <svg className="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                 </svg>
               </button>
-              <button className="p-3 hover:bg-white/50 rounded-full transition-colors">
+              <button onClick={() => navigate("/overview/1")} className="p-3 hover:bg-white/50 rounded-full transition-colors">
                 <svg className="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
@@ -264,12 +259,12 @@ export default function Home() {
 
             {/* Action Buttons for Second Post */}
             <div className="flex gap-4 justify-center mt-4">
-              <button className="p-3 hover:bg-white/50 rounded-full transition-colors">
+              <button onClick={() => navigate("/edit/2")} className="p-3 hover:bg-white/50 rounded-full transition-colors">
                 <svg className="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                 </svg>
               </button>
-              <button className="p-3 hover:bg-white/50 rounded-full transition-colors">
+              <button onClick={() => navigate("/overview/2")} className="p-3 hover:bg-white/50 rounded-full transition-colors">
                 <svg className="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>

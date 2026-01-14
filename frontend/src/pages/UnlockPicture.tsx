@@ -178,7 +178,8 @@ export default function UnlockPicture() {
   };
 
   const handleContinue = () => {
-    navigate("/home");
+    // Navigate to the post overview page
+    navigate(`/overview/${pictureInfo?.pictureId || shareToken}`);
   };
 
   if (loading) {
