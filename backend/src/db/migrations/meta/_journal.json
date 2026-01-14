@@ -5,8 +5,36 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1763574357833,
-      "tag": "0000_chief_speed_demon",
+      "when": 1764319896847,
+      "tag": "0000_foamy_mephistopheles",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1764320686808,
+      "tag": "0001_grey_franklin_storm",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1765802294909,
+      "tag": "0002_white_power_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1765803058467,
+      "tag": "0003_spooky_shaman",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1768220711221,
+      "tag": "0004_change_difficulty",
       "breakpoints": true
     }
   ]

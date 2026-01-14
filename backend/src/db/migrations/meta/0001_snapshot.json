@@ -1,6 +1,6 @@
 {
-  "id": "17198641-2085-4309-afe4-7d2cf62ddba3",
-  "prevId": "196eeb2b-1d59-4d6a-a3d1-4e9741e02f8c",
+  "id": "ccff439e-95da-4d76-8a7a-e03ceffd8a37",
+  "prevId": "d7308aaa-d645-400b-b43d-eb7c7b675444",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -335,7 +335,13 @@
           "name": "receiver_id",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
+        },
+        "recipient_identifier": {
+          "name": "recipient_identifier",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
         },
         "status": {
           "name": "status",
@@ -377,7 +383,22 @@
             }
           ],
           "isUnique": false,
-          "where": "status IN ('LOCKED', 'UNLOCKED')",
+          "where": "receiver_id IS NOT NULL AND status IN ('LOCKED', 'UNLOCKED')",
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_recipients_by_picture": {
+          "name": "idx_recipients_by_picture",
+          "columns": [
+            {
+              "expression": "picture_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
           "concurrently": false,
           "method": "btree",
           "with": {}
@@ -412,16 +433,7 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "unique_picture_receiver": {
-          "name": "unique_picture_receiver",
-          "nullsNotDistinct": false,
-          "columns": [
-            "picture_id",
-            "receiver_id"
-          ]
-        }
-      },
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
@@ -455,13 +467,6 @@
           "notNull": false,
           "default": "'IMAGE'"
         },
-        "view_duration": {
-          "name": "view_duration",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 10
-        },
         "required_game_id": {
           "name": "required_game_id",
           "type": "integer",
@@ -473,6 +478,26 @@
           "type": "jsonb",
           "primaryKey": false,
           "notNull": false
+        },
+        "share_token": {
+          "name": "share_token",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "max_unlocks": {
+          "name": "max_unlocks",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "current_unlocks": {
+          "name": "current_unlocks",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
         },
         "created_at": {
           "name": "created_at",
@@ -494,6 +519,21 @@
           "columns": [
             {
               "expression": "expires_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "idx_pictures_share_token": {
+          "name": "idx_pictures_share_token",
+          "columns": [
+            {
+              "expression": "share_token",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -534,7 +574,15 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
+      "uniqueConstraints": {
+        "pictures_share_token_unique": {
+          "name": "pictures_share_token_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "share_token"
+          ]
+        }
+      },
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false

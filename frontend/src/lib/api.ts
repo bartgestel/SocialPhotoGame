@@ -1,0 +1,182 @@
+// Use environment variable for API base URL
+// In Docker with nginx proxy: VITE_API_URL should be empty string (uses relative URLs like /api/*)
+// In local development: set to http://localhost:3000
+const API_BASE_URL = (import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL !== '') 
+    ? import.meta.env.VITE_API_URL 
+    : '';
+
+console.log('API_BASE_URL:', JSON.stringify(API_BASE_URL), 'VITE_API_URL:', import.meta.env.VITE_API_URL, 'type:', typeof import.meta.env.VITE_API_URL);
+
+export const api = {
+    // Friends endpoints
+    getFriends: async () => {
+        const response = await fetch(`${API_BASE_URL}/api/friends`, {
+            credentials: 'include',
+        });
+        if (!response.ok) throw new Error('Failed to fetch friends');
+        return response.json();
+    },
+
+    addFriend: async (friendId: string) => {
+        const response = await fetch(`${API_BASE_URL}/api/friends/add`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ friendId }),
+        });
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Failed to add friend');
+        }
+        return response.json();
+    },
+
+    getFriendRequests: async () => {
+        const response = await fetch(`${API_BASE_URL}/api/friends/requests`, {
+            credentials: 'include',
+        });
+        if (!response.ok) throw new Error('Failed to fetch friend requests');
+        return response.json();
+    },
+
+    respondToFriendRequest: async (friendshipId: string, accept: boolean) => {
+        const response = await fetch(`${API_BASE_URL}/api/friends/respond`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ friendshipId, accept }),
+        });
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Failed to respond to friend request');
+        }
+        return response.json();
+    },
+
+    // User endpoints
+    getUserById: async (userId: string) => {
+        const response = await fetch(`${API_BASE_URL}/api/users/${userId}`, {
+            credentials: 'include',
+        });
+        if (!response.ok) throw new Error('Failed to fetch user');
+        return response.json();
+    },
+
+    searchUsers: async (name: string) => {
+        const params = new URLSearchParams({ name });
+        const response = await fetch(`${API_BASE_URL}/api/users/search?${params}`, {
+            credentials: 'include',
+        });
+        if (!response.ok) throw new Error('Failed to search users');
+        return response.json();
+    },
+
+    // Picture endpoints
+    uploadPicture: async (formData: FormData) => {
+        const response = await fetch(`${API_BASE_URL}/api/pictures/upload`, {
+            method: 'POST',
+            credentials: 'include',
+            body: formData, // Don't set Content-Type, browser will set it with boundary
+        });
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Failed to upload picture');
+        }
+        return response.json();
+    },
+
+    getMyPictures: async () => {
+        const response = await fetch(`${API_BASE_URL}/api/pictures/my-pictures`, {
+            credentials: 'include',
+        });
+        if (!response.ok) throw new Error('Failed to fetch pictures');
+        return response.json();
+    },
+
+    getPictureByToken: async (shareToken: string, anonymousId?: string) => {
+        const url = anonymousId 
+            ? `${API_BASE_URL}/api/pictures/token/${shareToken}?anonymousId=${anonymousId}`
+            : `${API_BASE_URL}/api/pictures/token/${shareToken}`;
+        const response = await fetch(url);
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Failed to fetch picture');
+        }
+        return response.json();
+    },
+
+    getPictureById: async (pictureId: string) => {
+        const response = await fetch(`${API_BASE_URL}/api/pictures/id/${pictureId}`);
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Failed to fetch picture');
+        }
+        return response.json();
+    },
+
+    getPictureMedia: async (pictureId: string, anonymousId: string) => {
+        return `${API_BASE_URL}/api/pictures/${pictureId}/media/${anonymousId}`;
+    },
+
+    // Game endpoints
+    startGame: async (gameId: string, shareToken?: string, anonymousId?: string) => {
+        const response = await fetch(`${API_BASE_URL}/api/games/start`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ gameId, shareToken, anonymousId }),
+        });
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Failed to start game');
+        }
+        return response.json();
+    },
+
+    verifyGame: async (sessionId: string, signature: string, score?: number) => {
+        const response = await fetch(`${API_BASE_URL}/api/games/verify`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId, signature, score }),
+        });
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Failed to verify game');
+        }
+        return response.json();
+    },
+
+    getActiveGames: async () => {
+        const response = await fetch(`${API_BASE_URL}/api/games/active`, {
+            credentials: 'include',
+        });
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Failed to fetch games');
+        }
+        return response.json();
+    },
+
+    // Comment endpoints
+    getComments: async (pictureId: string) => {
+        const response = await fetch(`${API_BASE_URL}/api/comments/${pictureId}`);
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Failed to fetch comments');
+        }
+        return response.json();
+    },
+
+    addComment: async (pictureId: string, content: string, anonymousName?: string) => {
+        const response = await fetch(`${API_BASE_URL}/api/comments/${pictureId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ content, anonymousName }),
+        });
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Failed to add comment');
+        }
+        return response.json();
+    },
+};
