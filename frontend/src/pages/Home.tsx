@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { authClient } from "../lib/auth-client";
+import { api } from "../lib/api";
 import pBlobCut from "../assets/app_assets/p_blob_cut.svg";
 import gBlobCut from "../assets/app_assets/g_blob_cut.svg";
 import HomeD from "../assets/app_assets/svg/Home_d.svg";
@@ -10,13 +11,27 @@ import ProfileD from "../assets/app_assets/svg/profile_D.svg";
 import ProfileL from "../assets/app_assets/svg/profile_L.svg";
 import BlobsImage from "../assets/app_assets/blobs2.png";
 
+interface Post {
+  pictureId: string;
+  mediaUrl: string;
+  mediaType: string;
+  shareToken: string;
+  currentUnlocks: number;
+  maxUnlocks: number;
+  createdAt: string;
+  expiresAt: string | null;
+  requiredGameId: number | null;
+}
+
 export default function Home() {
   const navigate = useNavigate();
   const { data: session, isPending } = authClient.useSession();
   const [activeTab, setActiveTab] = useState<"home" | "add" | "profile">("home");
   const [shareModalOpen, setShareModalOpen] = useState(false);
-  const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [copied, setCopied] = useState(false);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loadingPosts, setLoadingPosts] = useState(true);
 
   useEffect(() => {
     if (!isPending && !session) {
@@ -24,21 +39,41 @@ export default function Home() {
     }
   }, [session, isPending, navigate]);
 
-  const handleShareClick = (postId: number) => {
-    setSelectedPostId(postId);
+  useEffect(() => {
+    if (session) {
+      loadPosts();
+    }
+  }, [session]);
+
+  const loadPosts = async () => {
+    try {
+      setLoadingPosts(true);
+      const data = await api.getMyPictures();
+      setPosts(data.pictures || []);
+    } catch (error) {
+      console.error("Failed to load posts:", error);
+    } finally {
+      setLoadingPosts(false);
+    }
+  };
+
+  const handleShareClick = (post: Post) => {
+    setSelectedPost(post);
     setShareModalOpen(true);
     setCopied(false);
   };
 
   const handleCopyLink = () => {
-    const shareLink = `${window.location.origin}/post/${selectedPostId}`;
+    if (!selectedPost) return;
+    const shareLink = `${window.location.origin}/post/${selectedPost.shareToken}`;
     navigator.clipboard.writeText(shareLink);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   const handleSocialShare = (platform: string) => {
-    const shareLink = `${window.location.origin}/post/${selectedPostId}`;
+    if (!selectedPost) return;
+    const shareLink = `${window.location.origin}/post/${selectedPost.shareToken}`;
     const shareText = "Check out my post!";
     
     const urls = {
@@ -103,19 +138,57 @@ export default function Home() {
 
           <div className="border-t border-primary  w-full mt-10 mb-10"></div>
 
+          {/* User's Posts */}
+          {loadingPosts ? (
+            <div className="text-center text-secondary py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+              <p className="mt-2">Loading your posts...</p>
+            </div>
+          ) : posts.length === 0 ? (
+            <div className="bg-gray-200 text-gray-600 rounded-2xl p-4 text-center shadow-card">
+              <span className="text-base">No posts yet. Create your first post!</span>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {posts.map((post) => (
+                <div key={post.pictureId} className="bg-white rounded-2xl p-4 shadow-card">
+                  <div className="flex items-start gap-3">
+                    <img 
+                      src={post.mediaUrl} 
+                      alt="Post" 
+                      className="w-20 h-20 rounded-lg object-cover"
+                    />
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-500 mb-1">
+                        {new Date(post.createdAt).toLocaleDateString()}
+                      </p>
+                      <p className="text-sm text-secondary mb-2">
+                        Unlocked {post.currentUnlocks} / {post.maxUnlocks === 0 ? '∞' : post.maxUnlocks} times
+                      </p>
+                      <button
+                        onClick={() => handleShareClick(post)}
+                        className="px-4 py-1 bg-primary text-white rounded-lg text-sm hover:bg-opacity-90"
+                      >
+                        Share
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* No New Comments Card */}
-          <div className="bg-[#808080] text-white rounded-2xl p-2 text-center shadow-card">
+          <div className="bg-[#808080] text-white rounded-2xl p-2 text-center shadow-card mt-6">
             <span className="text-base">No new comments</span>
           </div>
 
-          {/* Notifications */}
-          <div className="bg-primary text-white rounded-2xl p-2 shadow-card">
-            <span className="text-sm">"New chair" has been revealed 20 times</span>
-          </div>
-
-          <div className="bg-primary text-white rounded-2xl p-2 shadow-card">
-            <span className="text-sm">"Gender reveal" has been revealed 45 times</span>
-          </div>
+          {/* Notifications - only show if there are posts with unlocks */}
+          {posts.filter(p => p.currentUnlocks > 0).map((post, idx) => (
+            <div key={idx} className="bg-primary text-white rounded-2xl p-2 shadow-card">
+              <span className="text-sm">Your post has been revealed {post.currentUnlocks} times</span>
+            </div>
+          ))}
         </main>
 
         {/* Mobile Bottom Navigation */}
@@ -220,61 +293,68 @@ export default function Home() {
               <h2 className="text-lg font-medium text-secondary pb-2 border-b border-secondary/40">Recent posts</h2>
             </div>
             
-            {/* Post Card */}
-            <div className="bg-tertiary rounded-3xl overflow-hidden shadow-lg">
-              <div className="aspect-[3/4] bg-gradient-to-b from-tertiary to-white flex items-center justify-center">
-                <svg className="w-20 h-20 text-secondary/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {/* Posts Grid */}
+            {loadingPosts ? (
+              <div className="text-center text-secondary py-16">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+                <p className="mt-4">Loading your posts...</p>
+              </div>
+            ) : posts.length === 0 ? (
+              <div className="bg-white/50 rounded-3xl p-8 text-center">
+                <svg className="w-16 h-16 text-secondary/30 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
+                <p className="text-secondary text-lg">No posts yet</p>
+                <p className="text-secondary/60 text-sm mt-2">Create your first post to get started!</p>
+                <button
+                  onClick={() => navigate("/upload")}
+                  className="mt-4 px-6 py-2 bg-actionButton text-white rounded-lg hover:opacity-90"
+                >
+                  Create Post
+                </button>
               </div>
-            </div>
+            ) : (
+              <div className="space-y-8">
+                {posts.map((post) => (
+                  <div key={post.pictureId}>
+                    {/* Post Card */}
+                    <div className="bg-tertiary rounded-3xl overflow-hidden shadow-lg">
+                      <div className="aspect-[3/4] bg-gradient-to-b from-tertiary to-white relative">
+                        <img 
+                          src={post.mediaUrl} 
+                          alt="Post" 
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-4 justify-center mt-4 mb-8">
-              <button onClick={() => navigate("/edit/1")} className="p-3 hover:bg-white/50 rounded-full transition-colors">
-                <svg className="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                </svg>
-              </button>
-              <button onClick={() => navigate("/overview/1")} className="p-3 hover:bg-white/50 rounded-full transition-colors">
-                <svg className="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
-              </button>
-              <button onClick={() => handleShareClick(1)} className="p-3 hover:bg-white/50 rounded-full transition-colors">
-                <svg className="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                </svg>
-              </button>
-            </div>
-
-            {/* Second Post Card */}
-            <div className="bg-tertiary rounded-3xl overflow-hidden shadow-lg">
-              <div className="aspect-[3/4] bg-gradient-to-b from-tertiary to-white flex items-center justify-center">
-                <svg className="w-20 h-20 text-secondary/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
+                    {/* Action Buttons */}
+                    <div className="flex gap-4 justify-center mt-4 mb-2">
+                      <button onClick={() => navigate(`/edit/${post.pictureId}`)} className="p-3 hover:bg-white/50 rounded-full transition-colors" title="Edit">
+                        <svg className="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
+                      </button>
+                      <button onClick={() => navigate(`/overview/${post.pictureId}`)} className="p-3 hover:bg-white/50 rounded-full transition-colors" title="Overview">
+                        <svg className="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                        </svg>
+                      </button>
+                      <button onClick={() => handleShareClick(post)} className="p-3 hover:bg-white/50 rounded-full transition-colors" title="Share">
+                        <svg className="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                        </svg>
+                      </button>
+                    </div>
+                    
+                    {/* Post Stats */}
+                    <div className="text-center text-sm text-secondary/60 mb-8">
+                      Revealed {post.currentUnlocks} / {post.maxUnlocks === 0 ? '∞' : post.maxUnlocks} times
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-
-            {/* Action Buttons for Second Post */}
-            <div className="flex gap-4 justify-center mt-4">
-              <button onClick={() => navigate("/edit/2")} className="p-3 hover:bg-white/50 rounded-full transition-colors">
-                <svg className="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                </svg>
-              </button>
-              <button onClick={() => navigate("/overview/2")} className="p-3 hover:bg-white/50 rounded-full transition-colors">
-                <svg className="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
-              </button>
-              <button onClick={() => handleShareClick(2)} className="p-3 hover:bg-white/50 rounded-full transition-colors">
-                <svg className="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                </svg>
-              </button>
-            </div>
+            )}
           </div>
           </main>
         </div>
@@ -301,12 +381,11 @@ export default function Home() {
               <div className="bg-[#808080] text-white rounded-2xl px-4 py-4 text-center text-sm shadow-card">
                 No new comments
               </div>
-              <div className="bg-primary text-white rounded-2xl px-4 py-4 text-sm shadow-card">
-                "New chair" has been revealed 20 times
-              </div>
-              <div className="bg-primary text-white rounded-2xl px-4 py-4 text-sm shadow-card">
-                "Gender reveal" has been revealed 45 times
-              </div>
+              {posts.filter(p => p.currentUnlocks > 0).map((post) => (
+                <div key={post.pictureId} className="bg-primary text-white rounded-2xl px-4 py-4 text-sm shadow-card">
+                  Your post has been revealed {post.currentUnlocks} times
+                </div>
+              ))}
             </div>
           </div>
         </aside>
