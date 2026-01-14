@@ -134,12 +134,25 @@ public class XonixController : MonoBehaviour
     {
         if (other.CompareTag("Enemy"))
         {
-            if (XonixManager.Instance != null)
-            {
-                XonixManager.Instance.ResetTrail();
-            }
-            wasOnRedBlock = false;
-            Debug.Log("Hit by enemy!");
+            Die();
         }
+    }
+
+    private void Die()
+    {
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.PlayerDied();
+        }
+    }
+
+    public void Respawn(Vector2 spawnPosition)
+    {
+        rb.position = spawnPosition;
+        targetPos = spawnPosition;
+        transform.position = spawnPosition;
+        isMoving = false;
+        wasOnRedBlock = false;
+        isOnBorder = true;
     }
 }

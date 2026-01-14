@@ -7,7 +7,8 @@ public class XonixManager : MonoBehaviour
     public static XonixManager Instance;
     private List<RedBlock> currentTrail = new List<RedBlock>();
     public LayerMask redBlockLayer;
-    public float gridSize = 1f; // Add this to match your grid size
+    public float gridSize = 1f;
+    public GameObject borderPrefab;
 
     private void Awake()
     {
@@ -54,7 +55,6 @@ public class XonixManager : MonoBehaviour
             }
         }
 
-        // Find ALL regions that contain enemies (don't delete any of them)
         Collider2D[] enemies = GameObject.FindGameObjectsWithTag("Enemy")
             .Select(e => e.GetComponent<Collider2D>())
             .Where(c => c != null)
@@ -67,10 +67,9 @@ public class XonixManager : MonoBehaviour
             bool hasEnemy = false;
             foreach (var block in region)
             {
-                // Use OverlapCircle to check for enemies near this block
                 Collider2D[] nearbyColliders = Physics2D.OverlapCircleAll(
                     block.transform.position,
-                    gridSize * 0.6f // Check within 60% of grid size radius
+                    gridSize * 0.6f
                 );
 
                 foreach (var col in nearbyColliders)
@@ -89,16 +88,19 @@ public class XonixManager : MonoBehaviour
 
         Debug.Log($"Found {regions.Count} regions, {regionsWithEnemies.Count} contain enemies");
 
-        // Delete all regions that DON'T contain enemies
+        int totalDeleted = 0;
+
         foreach (var region in regions)
         {
             if (!regionsWithEnemies.Contains(region))
             {
                 Debug.Log($"Deleting region with {region.Count} blocks");
+                totalDeleted += region.Count;
                 foreach (var block in region)
                 {
                     if (block != null)
                     {
+                        CreateBorderAtPosition(block.transform.position);
                         Destroy(block.gameObject);
                     }
                 }
@@ -109,16 +111,35 @@ public class XonixManager : MonoBehaviour
             }
         }
 
-        // Delete the green trail blocks
+        totalDeleted += currentTrail.Count;
+
         foreach (RedBlock red in currentTrail)
         {
             if (red != null)
             {
+                CreateBorderAtPosition(red.transform.position);
                 Destroy(red.gameObject);
             }
         }
 
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.AddDeletedSquares(totalDeleted);
+        }
+
         currentTrail.Clear();
+    }
+
+    private void CreateBorderAtPosition(Vector3 position)
+    {
+        if (borderPrefab == null)
+        {
+            Debug.LogWarning("Border prefab not assigned!");
+            return;
+        }
+
+        GameObject border = Instantiate(borderPrefab, position, Quaternion.identity);
+        border.tag = "Border";
     }
 
     private void FloodFill(RedBlock start, HashSet<RedBlock> greenBlocks, HashSet<RedBlock> visited, HashSet<RedBlock> region, RedBlock[] allBlocks)

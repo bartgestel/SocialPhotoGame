@@ -428,6 +428,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 66214439}
+  - component: {fileID: 66214440}
   m_Layer: 0
   m_Name: PlayerStart
   m_TagString: Untagged
@@ -450,6 +451,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1519180792}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &66214440
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 66214438}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a391c635ce332824a847647f364a6755, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerStart
 --- !u!4 &69310403 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3888863037625715261, guid: 660c96a838e2ab14e8e655a5d04b0308, type: 3}
@@ -1901,6 +1914,7 @@ MonoBehaviour:
   playerStart: {fileID: 66214439}
   totalBones: 3
   bonesCollected: 0
+  gridSize: 2
 --- !u!4 &553464307
 Transform:
   m_ObjectHideFlags: 0
