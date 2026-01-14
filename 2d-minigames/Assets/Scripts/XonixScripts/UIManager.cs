@@ -112,6 +112,11 @@ public class UIManager : MonoBehaviour
             victoryText.text = "VICTORY!";
         }
 
+        if (GameCoordinatorScript.Instance != null)
+        {
+            GameCoordinatorScript.Instance.TriggerWin();
+        }
+
         Time.timeScale = 0f;
     }
 

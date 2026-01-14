@@ -38,6 +38,15 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/Speurhondenspel/TestLevel_Medium.unity
     guid: 060499d908b67754db5310890deb7d7f
+  - enabled: 1
+    path: Assets/Scenes/XonixScenes/Xonix_Easy.unity
+    guid: 8761bbe7b147245438debb8c4707420e
+  - enabled: 1
+    path: Assets/Scenes/XonixScenes/Xonix_Hard.unity
+    guid: a6dc9fee1a18b68418ed2b818e64cd22
+  - enabled: 1
+    path: Assets/Scenes/XonixScenes/Xonix_Medium.unity
+    guid: 492ed9d1b3a458243890579d1152ba6f
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0

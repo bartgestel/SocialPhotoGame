@@ -217,6 +217,11 @@ public class GameManager : MonoBehaviour
 
 			if (winSound != null)
 				audioSource.PlayOneShot(winSound);
+
+			if (GameCoordinatorScript.Instance != null)
+			{
+				GameCoordinatorScript.Instance.TriggerWin();
+			}
 			
 		}
 	}
