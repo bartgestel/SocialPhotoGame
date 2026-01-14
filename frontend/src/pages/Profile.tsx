@@ -1,25 +1,58 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { authClient } from "../lib/auth-client";
+import { api } from "../lib/api";
 import HomeD from "../assets/app_assets/svg/Home_d.svg";
 import HomeL from "../assets/app_assets/svg/Home_L.svg";
 import PhotoL from "../assets/app_assets/svg/photo_L.svg";
 import ProfileD from "../assets/app_assets/svg/profile_D.svg";
 import ProfileL from "../assets/app_assets/svg/profile_L.svg";
 
+interface Post {
+  pictureId: string;
+  mediaUrl: string;
+  mediaType: string;
+  shareToken: string;
+  currentUnlocks: number;
+  maxUnlocks: number;
+  createdAt: string;
+  expiresAt: string | null;
+  requiredGameId: number | null;
+}
+
 export default function Profile() {
   const navigate = useNavigate();
   const { data: session, isPending } = authClient.useSession();
   const [activeTab, setActiveTab] = useState<"home" | "add" | "profile">("profile");
   const [shareModalOpen, setShareModalOpen] = useState(false);
-  const [selectedPostId, setSelectedPostId] = useState<number | null>(null);
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [copied, setCopied] = useState(false);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loadingPosts, setLoadingPosts] = useState(true);
 
   useEffect(() => {
     if (!isPending && !session) {
       navigate("/signin");
     }
   }, [session, isPending, navigate]);
+
+  useEffect(() => {
+    if (session) {
+      loadPosts();
+    }
+  }, [session]);
+
+  const loadPosts = async () => {
+    try {
+      setLoadingPosts(true);
+      const data = await api.getMyPictures();
+      setPosts(data.pictures || []);
+    } catch (error) {
+      console.error("Failed to load posts:", error);
+    } finally {
+      setLoadingPosts(false);
+    }
+  };
 
   // Redirect to home on desktop
   useEffect(() => {
@@ -35,21 +68,23 @@ export default function Profile() {
     return () => window.removeEventListener('resize', checkScreenSize);
   }, [navigate]);
 
-  const handleShare = (postId: number) => {
-    setSelectedPostId(postId);
+  const handleShare = (post: Post) => {
+    setSelectedPost(post);
     setShareModalOpen(true);
     setCopied(false);
   };
 
   const handleCopyLink = () => {
-    const shareLink = `${window.location.origin}/post/${selectedPostId}`;
+    if (!selectedPost) return;
+    const shareLink = `${window.location.origin}/post/${selectedPost.shareToken}`;
     navigator.clipboard.writeText(shareLink);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
   const handleSocialShare = (platform: string) => {
-    const shareLink = `${window.location.origin}/post/${selectedPostId}`;
+    if (!selectedPost) return;
+    const shareLink = `${window.location.origin}/post/${selectedPost.shareToken}`;
     const shareText = "Check out my post!";
     
     const urls = {
@@ -75,22 +110,6 @@ export default function Profile() {
   if (!session) {
     return null;
   }
-
-  // Mock posts data - replace with actual API call
-  const userPosts = [
-    {
-      id: 1,
-      imageUrl: "https://images.unsplash.com/photo-1556912167-f556f1f39faa?w=400",
-      likes: 24,
-      comments: 5,
-    },
-    {
-      id: 2,
-      imageUrl: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400",
-      likes: 42,
-      comments: 8,
-    },
-  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -132,63 +151,83 @@ export default function Profile() {
         <main className="flex-1 overflow-y-auto px-4 py-6 pb-20">
           <h2 className="text-lg font-medium text-secondary mb-6">Recent posts</h2>
 
-          <div className="space-y-8">
-            {userPosts.length > 0 ? (
-              userPosts.map((post) => (
-                <div key={post.id} className="flex flex-col items-center">
-                  {/* Post Image */}
-                  <div className="w-full max-w-sm bg-tertiary rounded-3xl overflow-hidden shadow-card">
-                    <img
-                      src={post.imageUrl}
-                      alt="User post"
-                      className="w-full aspect-[3/4] object-cover"
-                    />
+          {loadingPosts ? (
+            <div className="text-center text-secondary py-16">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+              <p className="mt-4">Loading your posts...</p>
+            </div>
+          ) : posts.length === 0 ? (
+            <div className="text-center text-secondary/60 mt-12">
+              <svg className="w-16 h-16 text-secondary/30 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <p className="mb-4">No posts yet</p>
+              <button
+                onClick={() => navigate("/upload")}
+                className="px-6 py-2 bg-actionButton text-white rounded-lg hover:opacity-90"
+              >
+                Upload your first photo
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {posts.map((post) => (
+                <div key={post.pictureId}>
+                  {/* Post Card */}
+                  <div className="bg-white rounded-2xl overflow-hidden shadow-card">
+                    <div className="aspect-[3/4] bg-gradient-to-b from-tertiary to-white relative">
+                      <img
+                        src={post.mediaUrl}
+                        alt="Post"
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="flex gap-6 mt-4">
+                  <div className="flex gap-4 justify-center mt-3 mb-2">
                     <button 
-                      onClick={() => navigate(`/edit/${post.id}`)}
-                      className="p-2 hover:bg-tertiary rounded-full transition-colors"
+                      onClick={() => navigate(`/edit/${post.pictureId}`)}
+                      className="p-2 hover:bg-white rounded-full transition-colors"
+                      title="Edit"
                     >
-                      <svg className="w-6 h-6 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                       </svg>
                     </button>
                     <button 
-                      onClick={() => navigate(`/overview/${post.id}`)}
-                      className="p-2 hover:bg-tertiary rounded-full transition-colors"
+                      onClick={() => navigate(`/overview/${post.pictureId}`)}
+                      className="p-2 hover:bg-white rounded-full transition-colors"
+                      title="Overview"
                     >
-                      <svg className="w-6 h-6 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                       </svg>
                     </button>
                     <button 
-                      onClick={() => handleShare(post.id)}
-                      className="p-2 hover:bg-tertiary rounded-full transition-colors"
+                      onClick={() => handleShare(post)}
+                      className="p-2 hover:bg-white rounded-full transition-colors"
+                      title="Share"
                     >
-                      <svg className="w-6 h-6 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
                       </svg>
                     </button>
                   </div>
 
+                  {/* Post Stats */}
+                  <div className="text-center text-sm text-secondary/60 mb-4">
+                    Revealed {post.currentUnlocks} / {post.maxUnlocks === 0 ? '∞' : post.maxUnlocks} times
+                  </div>
+
                   {/* Divider between posts */}
-                  <div className="border-t border-primary w-full max-w-sm mt-8"></div>
+                  {posts.indexOf(post) < posts.length - 1 && (
+                    <div className="border-t border-primary w-full mt-4"></div>
+                  )}
                 </div>
-              ))
-            ) : (
-              <div className="text-center text-secondary/60 mt-12">
-                <p>No posts yet</p>
-                <button
-                  onClick={() => navigate("/upload")}
-                  className="mt-4 px-6 py-2 bg-actionButton text-white rounded-lg"
-                >
-                  Upload your first photo
-                </button>
-              </div>
-            )}
-          </div>
+              ))}
+            </div>
+          )}
         </main>
 
         {/* Share Modal */}
@@ -257,7 +296,7 @@ export default function Profile() {
                     <input
                       type="text"
                       readOnly
-                      value={`${window.location.origin}/post/${selectedPostId}`}
+                      value={selectedPost ? `${window.location.origin}/post/${selectedPost.shareToken}` : ''}
                       className="flex-1 bg-transparent text-sm text-secondary outline-none"
                     />
                     <button 
@@ -331,52 +370,6 @@ export default function Profile() {
           </button>
         </nav>
       </div>
-
-      {/* Desktop Layout - Simple centered version */}
-      <div className="hidden lg:flex flex-col items-center justify-center min-h-screen p-8">
-        <div className="max-w-2xl w-full bg-white rounded-2xl shadow-lg p-8">
-          <div className="flex justify-between items-start mb-8">
-            <h1 className="text-3xl font-bold text-secondary">Profile</h1>
-            <button
-              onClick={() => navigate("/settings")}
-              className="p-2 hover:bg-tertiary rounded-full"
-            >
-              <svg className="w-6 h-6 text-secondary" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z" />
-              </svg>
-            </button>
-          </div>
-
-          <div className="text-center mb-8">
-            <div className="w-32 h-32 rounded-full bg-primary/30 flex items-center justify-center border-4 border-primary mx-auto mb-4">
-              <svg className="w-16 h-16 text-primary" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-              </svg>
-            </div>
-            <h2 className="text-2xl font-semibold text-secondary">{session.user.name}</h2>
-          </div>
-
-          <div>
-            <h3 className="text-xl font-semibold text-secondary mb-4">Recent Posts</h3>
-            {userPosts.length > 0 ? (
-              <div className="grid grid-cols-2 gap-4">
-                {userPosts.map((post) => (
-                  <div key={post.id}>
-                    <img
-                      src={post.imageUrl}
-                      alt="User post"
-                      className="w-full aspect-square object-cover rounded-lg shadow-card"
-                    />
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-center text-secondary/60">No posts yet</p>
-            )}
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
-

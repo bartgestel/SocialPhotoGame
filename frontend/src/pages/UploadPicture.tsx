@@ -36,9 +36,11 @@ export default function UploadPicture() {
     const fetchGames = async () => {
       try {
         const result = await api.getActiveGames();
+        console.log('Fetched games:', result);
         setGames(result.games);
       } catch (err) {
         console.error('Failed to fetch games:', err);
+        setError('Failed to load games. Please refresh the page.');
       }
     };
     fetchGames();
@@ -278,18 +280,24 @@ export default function UploadPicture() {
           {/* Select Game */}
           <div>
             <label className="block text-sm font-medium text-secondary mb-2">Select game</label>
-            <select
-              value={selectedGameName}
-              onChange={(e) => setSelectedGameName(e.target.value)}
-              className="w-full px-4 py-3 bg-white rounded-2xl border-none outline-none text-secondary appearance-none cursor-pointer text-center"
-            >
-              <option value="">Choose a game</option>
-              {games.map((game) => (
-                <option key={game.name} value={game.name}>
-                  {game.name.charAt(0).toUpperCase() + game.name.slice(1)}
-                </option>
-              ))}
-            </select>
+            {games.length === 0 ? (
+              <div className="w-full px-4 py-3 bg-white rounded-2xl text-center text-secondary/40">
+                Loading games...
+              </div>
+            ) : (
+              <select
+                value={selectedGameName}
+                onChange={(e) => setSelectedGameName(e.target.value)}
+                className="w-full px-4 py-3 bg-white rounded-2xl border-none outline-none text-secondary appearance-none cursor-pointer text-center"
+              >
+                <option value="">Choose a game</option>
+                {games.map((game) => (
+                  <option key={game.name} value={game.name}>
+                    {game.name.charAt(0).toUpperCase() + game.name.slice(1)}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
           {/* Difficulty */}
@@ -394,18 +402,24 @@ export default function UploadPicture() {
 
                 <div>
                   <label className="block text-sm font-medium text-secondary mb-2">Game</label>
-                  <select
-                    value={selectedGameName}
-                    onChange={(e) => setSelectedGameName(e.target.value)}
-                    className="w-full px-4 py-2 bg-tertiary rounded-xl border-none outline-none text-secondary"
-                  >
-                    <option value="">Choose game</option>
-                    {games.map((game) => (
-                      <option key={game.name} value={game.name}>
-                        {game.name.charAt(0).toUpperCase() + game.name.slice(1)}
-                      </option>
-                    ))}
-                  </select>
+                  {games.length === 0 ? (
+                    <div className="w-full px-4 py-2 bg-tertiary rounded-xl text-secondary/40">
+                      Loading games...
+                    </div>
+                  ) : (
+                    <select
+                      value={selectedGameName}
+                      onChange={(e) => setSelectedGameName(e.target.value)}
+                      className="w-full px-4 py-2 bg-tertiary rounded-xl border-none outline-none text-secondary"
+                    >
+                      <option value="">Choose game</option>
+                      {games.map((game) => (
+                        <option key={game.name} value={game.name}>
+                          {game.name.charAt(0).toUpperCase() + game.name.slice(1)}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                 </div>
 
                 <div>

@@ -1,7 +1,7 @@
 import type { Request, Response } from "express";
 import { db } from "../config/db.js";
 import { pictures, pictureRecipients, user } from "../db/models/schema.js";
-import { eq, and } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 import crypto from "crypto";
 import path from "path";
 import fs from "fs";
@@ -69,6 +69,7 @@ export const uploadPicture = async (req: Request, res: Response) => {
 export const getPictureByToken = async (req: Request, res: Response) => {
     try {
         const { shareToken } = req.params;
+        const { anonymousId } = req.query; // Get anonymousId from query params
 
         const picture = await db
             .select({
@@ -101,6 +102,34 @@ export const getPictureByToken = async (req: Request, res: Response) => {
             return res.status(403).json({ error: "Maximum unlocks reached for this picture" });
         }
 
+        // Check if this anonymous user has already unlocked the picture
+        let isUnlocked = false;
+        let unlockedPicture = null;
+
+        if (anonymousId) {
+            const recipient = await db
+                .select()
+                .from(pictureRecipients)
+                .where(
+                    and(
+                        eq(pictureRecipients.pictureId, pictureData.picture.pictureId),
+                        eq(pictureRecipients.recipientIdentifier, anonymousId as string)
+                    )
+                )
+                .limit(1);
+
+            if (recipient && recipient.length > 0 && (recipient[0].status === 'UNLOCKED' || recipient[0].status === 'VIEWED')) {
+                isUnlocked = true;
+                unlockedPicture = {
+                    pictureId: pictureData.picture.pictureId,
+                    mediaUrl: pictureData.picture.mediaUrl,
+                    mediaType: pictureData.picture.mediaType,
+                    createdAt: pictureData.picture.createdAt,
+                    sender: pictureData.sender
+                };
+            }
+        }
+
         res.status(200).json({
             pictureId: pictureData.picture.pictureId,
             requiredGameId: pictureData.picture.requiredGameId,
@@ -108,7 +137,9 @@ export const getPictureByToken = async (req: Request, res: Response) => {
             createdAt: pictureData.picture.createdAt,
             expiresAt: pictureData.picture.expiresAt,
             maxUnlocks: pictureData.picture.maxUnlocks,
-            currentUnlocks: pictureData.picture.currentUnlocks
+            currentUnlocks: pictureData.picture.currentUnlocks,
+            isUnlocked,
+            unlockedPicture
         });
     } catch (error) {
         console.error("Error fetching picture:", error);
@@ -187,13 +218,54 @@ export const getMyPictures = async (req: Request, res: Response) => {
             .select()
             .from(pictures)
             .where(eq(pictures.senderId, userId))
-            .orderBy(pictures.createdAt)
+            .orderBy(desc(pictures.createdAt))
             .limit(100);  // Prevent unbounded result sets
 
         res.status(200).json({ pictures: myPictures });
     } catch (error) {
-        console.error("Error fetching user pictures:", error);
+        console.error("Error fetching pictures:", error);
         res.status(500).json({ error: "Failed to fetch pictures" });
+    }
+};
+
+// Get picture by ID (for viewing/overview)
+export const getPictureById = async (req: Request, res: Response) => {
+    try {
+        const { pictureId } = req.params;
+
+        const picture = await db
+            .select({
+                picture: pictures,
+                sender: {
+                    id: user.id,
+                    name: user.name,
+                    username: user.username,
+                    image: user.image
+                }
+            })
+            .from(pictures)
+            .innerJoin(user, eq(pictures.senderId, user.id))
+            .where(eq(pictures.pictureId, pictureId))
+            .limit(1);
+
+        if (!picture || picture.length === 0) {
+            return res.status(404).json({ error: "Picture not found" });
+        }
+
+        const pictureData = picture[0];
+
+        res.status(200).json({
+            pictureId: pictureData.picture.pictureId,
+            mediaUrl: pictureData.picture.mediaUrl,
+            mediaType: pictureData.picture.mediaType,
+            createdAt: pictureData.picture.createdAt,
+            sender: pictureData.sender,
+            requiredGameId: pictureData.picture.requiredGameId,
+            shareToken: pictureData.picture.shareToken
+        });
+    } catch (error) {
+        console.error("Error fetching picture:", error);
+        res.status(500).json({ error: "Failed to fetch picture" });
     }
 };
 

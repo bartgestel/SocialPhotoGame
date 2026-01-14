@@ -22,7 +22,7 @@ public class GameCoordinatorScript : MonoBehaviour {
     private string _currentUnityScene;
     private string _currentGameId;
     private const string SECRET_KEY = "A64814991BEEC14ED7747FE2E1AFD"; // Must match backend
-    private const string API_URL = "http://localhost:3000/api/games/verify";
+    private const string API_URL = "/api/games/verify"; // Relative path works for both dev and production
 
     // Public getters
     public string CurrentGameId => _currentGameId;

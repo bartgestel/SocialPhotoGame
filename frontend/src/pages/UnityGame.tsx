@@ -1,5 +1,13 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { api } from "../lib/api";
+
+// Extend window interface to include Unity game completion handler
+declare global {
+  interface Window {
+    unityGameComplete?: (sessionId: string, signature: string, score?: number) => void;
+  }
+}
 
 export default function UnityGame() {
   const [searchParams] = useSearchParams();
@@ -8,6 +16,37 @@ export default function UnityGame() {
   const gameId = searchParams.get("gameId");
   const pictureId = searchParams.get("pictureId");
   const [loadingProgress, setLoadingProgress] = useState(0);
+
+  // Set up handler for Unity game completion
+  useEffect(() => {
+    window.unityGameComplete = async (sessionId: string, signature: string, score?: number) => {
+      console.log("Unity game completed, verifying...", { sessionId, signature, score });
+      
+      try {
+        // Call backend to verify the game completion
+        const result = await api.verifyGame(sessionId, signature, score);
+        console.log("Verification result:", result);
+        
+        // If this was a picture unlock game and it was successful, notify parent window
+        if (window.parent && window.parent.handleUnityGameComplete) {
+          window.parent.handleUnityGameComplete(result);
+        }
+      } catch (error) {
+        console.error("Failed to verify game:", error);
+        // Notify parent of failure
+        if (window.parent && window.parent.handleUnityGameComplete) {
+          window.parent.handleUnityGameComplete({
+            success: false,
+            error: error instanceof Error ? error.message : "Verification failed"
+          });
+        }
+      }
+    };
+
+    return () => {
+      delete window.unityGameComplete;
+    };
+  }, []);
 
   useEffect(() => {
     // Load Unity loader script

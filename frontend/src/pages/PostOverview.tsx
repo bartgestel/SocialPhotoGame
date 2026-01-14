@@ -1,20 +1,28 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { authClient } from "../lib/auth-client";
+import { api } from "../lib/api";
 import BlobsImage from "../assets/app_assets/blobs2.png";
 
 interface Comment {
-  id: string;
-  userName: string;
-  text: string;
+  commentId: string;
+  commenterId: string;
+  content: string;
+  createdAt: string;
+  username: string | null;
 }
 
-interface Post {
-  id: string;
-  title: string;
-  imageUrl: string;
-  description: string;
-  comments: Comment[];
+interface Picture {
+  pictureId: string;
+  mediaUrl: string;
+  mediaType: string;
+  createdAt: string;
+  sender: {
+    id: string;
+    name: string;
+    username: string | null;
+    image: string | null;
+  };
 }
 
 export default function PostOverview() {
@@ -22,21 +30,12 @@ export default function PostOverview() {
   const { postId } = useParams<{ postId: string }>();
   const { data: session, isPending } = authClient.useSession();
   const [comment, setComment] = useState("");
-  const [commentName, setCommentName] = useState("");
   const [imageZoomed, setImageZoomed] = useState(false);
-  
-  // Mock post data - replace with API call
-  const [post, setPost] = useState<Post>({
-    id: postId || "1",
-    title: "Couch reveal",
-    imageUrl: "https://via.placeholder.com/400x600/AF8159/FFFFFF?text=Post+Image",
-    description: "I've bought this new chair! I've finally completed my vision for my living room and im so happy to finally show it to you!",
-    comments: [
-      { id: "1", userName: "Auntie May", text: "Finally! I'm so happy for you!" },
-      { id: "2", userName: "Friend Sarah", text: "You've been working so hard to get this. Good job!" },
-      { id: "3", userName: "Friend Brian", text: "Can't wait to come and see it in person!" },
-    ]
-  });
+  const [picture, setPicture] = useState<Picture | null>(null);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [submittingComment, setSubmittingComment] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (!isPending && !session) {
@@ -44,37 +43,70 @@ export default function PostOverview() {
     }
   }, [session, isPending, navigate]);
 
-  const handleSendComment = () => {
-    if (comment.trim() && commentName.trim()) {
-      // Add new comment to the list
-      const newComment = {
-        id: String(Date.now()),
-        userName: commentName.trim(),
-        text: comment.trim()
-      };
+  useEffect(() => {
+    const loadData = async () => {
+      if (!postId) return;
       
-      setPost({
-        ...post,
-        comments: [...post.comments, newComment]
-      });
-      
-      // TODO: Send comment to backend
-      console.log("Sending comment:", { name: commentName, text: comment });
+      try {
+        setLoading(true);
+        const [pictureData, commentsData] = await Promise.all([
+          api.getPictureById(postId),
+          api.getComments(postId)
+        ]);
+        setPicture(pictureData);
+        setComments(commentsData.comments || []);
+      } catch (err: any) {
+        console.error("Failed to load data:", err);
+        setError(err.message || "Failed to load picture");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (session) {
+      loadData();
+    }
+  }, [postId, session]);
+
+  const handleSendComment = async () => {
+    if (!comment.trim() || !postId) return;
+
+    try {
+      setSubmittingComment(true);
+      const data = await api.addComment(postId, comment);
+      setComments([data.comment, ...comments]);
       setComment("");
-      setCommentName("");
+    } catch (err: any) {
+      console.error("Failed to add comment:", err);
+      setError(err.message || "Failed to add comment");
+    } finally {
+      setSubmittingComment(false);
     }
   };
 
-  if (isPending) {
+  if (isPending || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-xl">Loading...</div>
+        <div className="text-xl text-secondary">Loading...</div>
       </div>
     );
   }
 
-  if (!session) {
+  if (!session || !picture) {
     return null;
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">{error}</p>
+          <button onClick={() => navigate("/home")} className="text-primary underline">
+            Go back
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -99,26 +131,18 @@ export default function PostOverview() {
 
         {/* Content */}
         <main className="px-4 py-6 space-y-6">
-          {/* Post Title */}
-          <h2 className="text-2xl font-medium text-secondary text-center">{post.title}</h2>
+          {/* Sender Name */}
+          <h2 className="text-2xl font-medium text-secondary text-center">Picture from {picture.sender.name}</h2>
 
           {/* Post Image */}
           <div className="flex justify-center">
             <div className="w-full max-w-sm bg-white rounded-3xl overflow-hidden shadow-card">
               <img 
-                src={post.imageUrl} 
-                alt={post.title}
+                src={picture.mediaUrl} 
+                alt="Picture"
                 className="w-full aspect-[3/4] object-cover"
               />
             </div>
-          </div>
-
-          {/* Description Section */}
-          <div className="space-y-2">
-            <h3 className="text-lg font-medium text-primary">Description</h3>
-            <p className="text-base text-secondary leading-relaxed">
-              {post.description}
-            </p>
           </div>
 
           {/* Comments Section */}
@@ -126,23 +150,20 @@ export default function PostOverview() {
             <h3 className="text-lg font-medium text-primary">Comments</h3>
             
             <div className="space-y-4">
-              {post.comments.map((comment) => (
-                <div key={comment.id} className="pb-3 border-b border-primary/20">
-                  <p className="font-semibold text-secondary text-sm mb-1">{comment.userName}</p>
-                  <p className="text-secondary text-sm">{comment.text}</p>
-                </div>
-              ))}
+              {comments.length === 0 ? (
+                <p className="text-secondary/60 text-center py-4">No comments yet</p>
+              ) : (
+                comments.map((commentItem) => (
+                  <div key={commentItem.commentId} className="pb-3 border-b border-primary/20">
+                    <p className="font-semibold text-secondary text-sm mb-1">{commentItem.username || "Anonymous"}</p>
+                    <p className="text-secondary text-sm">{commentItem.content}</p>
+                  </div>
+                ))
+              )}
             </div>
 
             {/* Comment Input */}
             <div className="space-y-3 pt-4">
-              <input
-                type="text"
-                value={commentName}
-                onChange={(e) => setCommentName(e.target.value)}
-                placeholder="Your name"
-                className="w-full px-4 py-3 bg-white rounded-full border-none text-secondary placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20"
-              />
               <textarea
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
@@ -152,10 +173,10 @@ export default function PostOverview() {
               />
               <button
                 onClick={handleSendComment}
-                disabled={!comment.trim() || !commentName.trim()}
+                disabled={!comment.trim() || submittingComment}
                 className="w-full py-3 bg-actionButton text-white rounded-full font-medium hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Send
+                {submittingComment ? "Sending..." : "Send"}
               </button>
             </div>
           </div>
@@ -243,8 +264,8 @@ export default function PostOverview() {
                 onClick={() => setImageZoomed(true)}
               >
                 <img 
-                  src={post.imageUrl} 
-                  alt={post.title}
+                  src={picture.mediaUrl} 
+                  alt="Picture"
                   className="w-full aspect-[3/4] object-cover"
                 />
                 {/* Zoom Icon Overlay */}
@@ -256,19 +277,19 @@ export default function PostOverview() {
               </div>
 
               <div className="bg-white rounded-2xl p-6 shadow-lg space-y-6">
-                {/* Title (Read-only) */}
+                {/* Sender Info */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-secondary">Title</label>
+                  <label className="text-sm font-medium text-secondary">From</label>
                   <div className="px-4 py-3 bg-tertiary rounded-2xl text-secondary">
-                    {post.title}
+                    {picture.sender.name}
                   </div>
                 </div>
 
-                {/* Description (Read-only) */}
+                {/* Date */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-secondary">Description</label>
-                  <div className="px-4 py-3 bg-tertiary rounded-2xl text-secondary min-h-[120px]">
-                    {post.description}
+                  <label className="text-sm font-medium text-secondary">Date</label>
+                  <div className="px-4 py-3 bg-tertiary rounded-2xl text-secondary">
+                    {new Date(picture.createdAt).toLocaleDateString()}
                   </div>
                 </div>
               </div>
@@ -284,23 +305,20 @@ export default function PostOverview() {
               
               {/* Existing Comments - Scrollable */}
               <div className="space-y-3 overflow-y-auto mb-6 flex-1 pr-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-                {post.comments.map((commentItem) => (
-                  <div key={commentItem.id} className="pb-3 border-b border-secondary/10">
-                    <p className="font-semibold text-secondary text-sm mb-1">{commentItem.userName}</p>
-                    <p className="text-secondary text-sm">{commentItem.text}</p>
-                  </div>
-                ))}
+                {comments.length === 0 ? (
+                  <p className="text-secondary/60 text-center py-4">No comments yet</p>
+                ) : (
+                  comments.map((commentItem) => (
+                    <div key={commentItem.commentId} className="pb-3 border-b border-secondary/10">
+                      <p className="font-semibold text-secondary text-sm mb-1">{commentItem.username || "Anonymous"}</p>
+                      <p className="text-secondary text-sm">{commentItem.content}</p>
+                    </div>
+                  ))
+                )}
               </div>
 
               {/* Comment Input - Fixed at Bottom */}
               <div className="space-y-3 pt-4 border-t border-secondary/20">
-                <input
-                  type="text"
-                  value={commentName}
-                  onChange={(e) => setCommentName(e.target.value)}
-                  placeholder="Your name"
-                  className="w-full px-4 py-3 bg-tertiary rounded-xl text-secondary placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20"
-                />
                 <textarea
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
@@ -310,10 +328,10 @@ export default function PostOverview() {
                 />
                 <button
                   onClick={handleSendComment}
-                  disabled={!comment.trim() || !commentName.trim()}
+                  disabled={!comment.trim() || submittingComment}
                   className="w-full py-3 bg-actionButton text-white rounded-xl font-medium hover:opacity-90 transition-opacity shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Send
+                  {submittingComment ? "Sending..." : "Send"}
                 </button>
               </div>
             </div>
@@ -336,8 +354,8 @@ export default function PostOverview() {
             </button>
             <div className="max-w-4xl max-h-full">
               <img 
-                src={post.imageUrl} 
-                alt={post.title}
+                src={picture.mediaUrl} 
+                alt="Picture"
                 className="max-w-full max-h-[90vh] object-contain rounded-lg"
                 onClick={(e) => e.stopPropagation()}
               />

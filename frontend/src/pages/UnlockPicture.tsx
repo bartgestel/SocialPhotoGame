@@ -37,6 +37,14 @@ interface UnlockedPicture {
   };
 }
 
+interface Comment {
+  commentId: string;
+  commenterId: string;
+  content: string;
+  createdAt: string;
+  username: string | null;
+}
+
 export default function UnlockPicture() {
   const { shareToken } = useParams<{ shareToken: string }>();
   const navigate = useNavigate();
@@ -49,6 +57,9 @@ export default function UnlockPicture() {
   const [gameSessionId, setGameSessionId] = useState<string>("");
   const [unityScene, setUnityScene] = useState<string>("");
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [comments, setComments] = useState<Comment[]>([]);
+  const [newComment, setNewComment] = useState("");
+  const [submittingComment, setSubmittingComment] = useState(false);
 
   useEffect(() => {
     // Get or create anonymous ID from localStorage
@@ -63,9 +74,13 @@ export default function UnlockPicture() {
       localStorage.setItem("anonymousId", storedId);
     }
     setAnonymousId(storedId);
+  }, []);
 
-    loadPictureInfo();
-  }, [shareToken]);
+  useEffect(() => {
+    if (anonymousId && shareToken) {
+      loadPictureInfo();
+    }
+  }, [shareToken, anonymousId]);
 
   // Listen for Unity game completion
   useEffect(() => {
@@ -73,6 +88,8 @@ export default function UnlockPicture() {
       if (result.success && result.pictureUnlocked && result.picture) {
         setUnlockedPicture(result.picture);
         setStep("revealed");
+        // Load comments when picture is revealed
+        loadComments(result.picture.pictureId);
       } else {
         setError("Failed to unlock picture");
       }
@@ -82,6 +99,30 @@ export default function UnlockPicture() {
       delete window.handleUnityGameComplete;
     };
   }, []);
+
+  const loadComments = async (pictureId: string) => {
+    try {
+      const data = await api.getComments(pictureId);
+      setComments(data.comments || []);
+    } catch (err: any) {
+      console.error("Failed to load comments:", err);
+    }
+  };
+
+  const handleAddComment = async () => {
+    if (!newComment.trim() || !unlockedPicture) return;
+
+    try {
+      setSubmittingComment(true);
+      const data = await api.addComment(unlockedPicture.pictureId, newComment);
+      setComments([data.comment, ...comments]);
+      setNewComment("");
+    } catch (err: any) {
+      setError(err.message || "Failed to add comment");
+    } finally {
+      setSubmittingComment(false);
+    }
+  };
 
   // Auto-focus iframe when game loads
   useEffect(() => {
@@ -99,8 +140,15 @@ export default function UnlockPicture() {
     try {
       setLoading(true);
       setError("");
-      const data = await api.getPictureByToken(shareToken);
+      const data = await api.getPictureByToken(shareToken, anonymousId);
       setPictureInfo(data);
+      
+      // If the picture is already unlocked for this user, show it immediately
+      if (data.isUnlocked && data.unlockedPicture) {
+        setUnlockedPicture(data.unlockedPicture);
+        setStep("revealed");
+        loadComments(data.unlockedPicture.pictureId);
+      }
     } catch (err: any) {
       // For development: Show mock data if picture not found
       if (err.message.includes("Picture not found") || err.message.includes("404")) {
@@ -295,28 +343,24 @@ export default function UnlockPicture() {
 
   // Step 3: Revealed Picture Page
   if (step === "revealed" && unlockedPicture) {
-    const handleNavigateToComments = () => {
-      // Navigate to overview page where they can leave comments
-      navigate(`/overview/${pictureInfo?.pictureId || '1'}`);
+    const handlePictureClick = () => {
+      navigate(`/overview/${unlockedPicture.pictureId}`);
     };
 
     return (
-      <div className="min-h-screen bg-primary flex flex-col items-center justify-between p-8 pt-16 pb-8">
+      <div className="min-h-screen bg-primary flex flex-col p-6 pt-12 pb-8">
         {/* Success Message */}
-        <div className="text-center text-white space-y-2 max-w-sm">
+        <div className="text-center text-white space-y-2 mb-6">
           <p className="text-xl font-semibold">Great job!</p>
           <p className="text-base">You've revealed the whole picture</p>
-          <p className="text-sm mt-4">
-            Tap to leave a comment and let "{unlockedPicture.sender.name}" know what you think!
-          </p>
         </div>
 
         {/* Picture Display - Clickable */}
         <div 
-          onClick={handleNavigateToComments}
-          className="flex-1 flex items-center justify-center my-8 cursor-pointer"
+          onClick={handlePictureClick}
+          className="flex justify-center mb-6 cursor-pointer"
         >
-          <div className="w-full max-w-sm aspect-[3/4] bg-white rounded-3xl overflow-hidden shadow-2xl transform rotate-3 hover:rotate-0 transition-transform">
+          <div className="w-full max-w-sm aspect-[3/4] bg-white rounded-3xl overflow-hidden shadow-2xl hover:scale-105 transition-transform">
             <img
               src={unlockedPicture.mediaUrl}
               alt="Revealed picture"
@@ -325,13 +369,57 @@ export default function UnlockPicture() {
           </div>
         </div>
 
-        {/* Continue Button */}
-        <button
-          onClick={handleContinue}
-          className="w-full max-w-sm py-4 bg-secondary text-white rounded-3xl font-medium shadow-lg hover:opacity-90 transition-opacity"
-        >
-          Continue
-        </button>
+        {/* Comments Section */}
+        <div className="flex-1 flex flex-col max-w-sm mx-auto w-full">
+          <h3 className="text-white text-lg font-semibold mb-4">Comments</h3>
+          
+          {/* Comment Input */}
+          <div className="bg-white rounded-2xl p-4 mb-4 shadow-lg">
+            <textarea
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              placeholder="Leave a comment..."
+              className="w-full p-3 border border-tertiary/30 rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-secondary"
+              rows={3}
+            />
+            <button
+              onClick={handleAddComment}
+              disabled={!newComment.trim() || submittingComment}
+              className="mt-2 w-full py-2 bg-secondary text-white rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed hover:opacity-90 transition-opacity"
+            >
+              {submittingComment ? "Posting..." : "Post Comment"}
+            </button>
+          </div>
+
+          {/* Comments List */}
+          <div className="flex-1 overflow-y-auto space-y-3 mb-4">
+            {comments.length === 0 ? (
+              <p className="text-white/60 text-center py-4">No comments yet. Be the first to comment!</p>
+            ) : (
+              comments.map((comment) => (
+                <div key={comment.commentId} className="bg-white rounded-xl p-4 shadow">
+                  <div className="flex items-start justify-between mb-2">
+                    <span className="font-semibold text-secondary">
+                      {comment.username || "Anonymous"}
+                    </span>
+                    <span className="text-xs text-secondary/60">
+                      {new Date(comment.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <p className="text-secondary/80">{comment.content}</p>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Continue Button */}
+          <button
+            onClick={handleContinue}
+            className="w-full py-4 bg-white text-secondary rounded-3xl font-medium shadow-lg hover:opacity-90 transition-opacity"
+          >
+            Continue
+          </button>
+        </div>
       </div>
     );
   }

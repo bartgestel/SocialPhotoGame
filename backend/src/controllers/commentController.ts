@@ -30,41 +30,71 @@ export const getCommentsForPicture = async (req: Request, res: Response) => {
 
 export const addCommentToPicture = async (req: Request, res: Response) => {
     const { pictureId } = req.params;
-    const { content } = req.body;
+    const { content, anonymousName } = req.body;
     const commenterId = req.user?.id;
-
-    if (!commenterId) {
-        return res.status(401).json({ error: "Unauthorized" });
-    }
 
     if (!content || content.trim() === "") {
         return res.status(400).json({ error: "Comment content cannot be empty" });
     }
 
     try {
+        let finalCommenterId = commenterId;
+        let username: string | null = null;
+
+        if (commenterId) {
+            // Authenticated user - get their username
+            const userRecord = await db
+                .select({ username: user.username, name: user.name })
+                .from(user)
+                .where(eq(user.id, commenterId))
+                .limit(1);
+            username = userRecord[0]?.username || userRecord[0]?.name || "User";
+        } else {
+            // Anonymous user - create or get a system "anonymous" user
+            const anonymousUser = await db
+                .select()
+                .from(user)
+                .where(eq(user.email, "anonymous@system.local"))
+                .limit(1);
+
+            if (anonymousUser.length === 0) {
+                // Create anonymous system user if doesn't exist
+                const newAnonymousUser = await db
+                    .insert(user)
+                    .values({
+                        id: "anonymous-user",
+                        name: "Anonymous",
+                        email: "anonymous@system.local",
+                        emailVerified: false,
+                        createdAt: new Date(),
+                        updatedAt: new Date()
+                    })
+                    .returning();
+                finalCommenterId = newAnonymousUser[0].id;
+            } else {
+                finalCommenterId = anonymousUser[0].id;
+            }
+            username = anonymousName || "Anonymous";
+        }
+
         const newComment = await db.insert(pictureComments).values({
             commentId: crypto.randomBytes(16).toString('hex'),
             pictureId,
-            commenterId,
+            commenterId: finalCommenterId,
             content: content.trim(),
             createdAt: new Date()
         }).returning();
 
-        // Fetch the inserted comment together with the commenter's username for the response
-        const inserted = newComment[0];
-        const commentWithUser = await db
-            .select({
-                commentId: pictureComments.commentId,
-                commenterId: pictureComments.commenterId,
-                content: pictureComments.content,
-                createdAt: pictureComments.createdAt,
-                username: user.username,
-            })
-            .from(pictureComments)
-            .innerJoin(user, eq(pictureComments.commenterId, user.id))
-            .where(eq(pictureComments.commentId, inserted.commentId));
-
-        res.status(201).json({ comment: commentWithUser[0] });
+        // Return the comment with the determined username
+        res.status(201).json({ 
+            comment: {
+                commentId: newComment[0].commentId,
+                commenterId: finalCommenterId,
+                content: newComment[0].content,
+                createdAt: newComment[0].createdAt,
+                username: username
+            }
+        });
     } catch (error) {
         console.error("Error adding comment:", error);
         res.status(500).json({ error: "Internal Server Error" });

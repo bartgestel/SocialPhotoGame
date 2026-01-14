@@ -30,8 +30,14 @@ EditorBuildSettings:
     path: Assets/Scenes/MicroRacer/Expert.unity
     guid: 46272b5e00ec62c4fa66a11dbae4daa8
   - enabled: 1
-    path: Assets/Scenes/Speurhondenspel/Hard_Speurhondenspel.unity
-    guid: d6731aa4a5e566541a4ec19452b7efeb
+    path: Assets/Scenes/Speurhondenspel/TestLevel_Easy.unity
+    guid: 282d8ae2702669b47b7c308cd87d7a42
+  - enabled: 1
+    path: Assets/Scenes/Speurhondenspel/TestLevel_Hard.unity
+    guid: 14dbfbc4354b02142a888bd04348c002
+  - enabled: 1
+    path: Assets/Scenes/Speurhondenspel/TestLevel_Medium.unity
+    guid: 060499d908b67754db5310890deb7d7f
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0

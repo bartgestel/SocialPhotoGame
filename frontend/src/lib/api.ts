@@ -93,8 +93,20 @@ export const api = {
         return response.json();
     },
 
-    getPictureByToken: async (shareToken: string) => {
-        const response = await fetch(`${API_BASE_URL}/api/pictures/token/${shareToken}`);
+    getPictureByToken: async (shareToken: string, anonymousId?: string) => {
+        const url = anonymousId 
+            ? `${API_BASE_URL}/api/pictures/token/${shareToken}?anonymousId=${anonymousId}`
+            : `${API_BASE_URL}/api/pictures/token/${shareToken}`;
+        const response = await fetch(url);
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Failed to fetch picture');
+        }
+        return response.json();
+    },
+
+    getPictureById: async (pictureId: string) => {
+        const response = await fetch(`${API_BASE_URL}/api/pictures/id/${pictureId}`);
         if (!response.ok) {
             const data = await response.json();
             throw new Error(data.error || 'Failed to fetch picture');
@@ -140,6 +152,30 @@ export const api = {
         if (!response.ok) {
             const data = await response.json();
             throw new Error(data.error || 'Failed to fetch games');
+        }
+        return response.json();
+    },
+
+    // Comment endpoints
+    getComments: async (pictureId: string) => {
+        const response = await fetch(`${API_BASE_URL}/api/comments/${pictureId}`);
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Failed to fetch comments');
+        }
+        return response.json();
+    },
+
+    addComment: async (pictureId: string, content: string, anonymousName?: string) => {
+        const response = await fetch(`${API_BASE_URL}/api/comments/${pictureId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ content, anonymousName }),
+        });
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Failed to add comment');
         }
         return response.json();
     },

@@ -5,8 +5,9 @@ import crypto from "crypto";
 import { 
     uploadPicture, 
     getPictureByToken, 
-    getPictureMedia, 
+    getPictureMedia,
     getMyPictures,
+    getPictureById,
     getPicturePieces
 } from "../controllers/pictureController.js";
 import { requireAuth } from "../middleware/requireAuth.js";
@@ -46,8 +47,11 @@ router.post("/upload", requireAuth, upload.single('picture'), uploadPicture);
 // Get user's uploaded pictures (requires authentication)
 router.get("/my-pictures", requireAuth, getMyPictures);
 
-// Get picture info by share token (public)
+// Get picture by share token (public)
 router.get("/token/:shareToken", getPictureByToken);
+
+// Get picture by ID
+router.get("/id/:pictureId", getPictureById);
 
 // Get picture media file (public, but checks unlock status)
 router.get("/:pictureId/media/:anonymousId", getPictureMedia);
