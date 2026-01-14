@@ -532,6 +532,11 @@ pnpm db:push        # Push schema changes
 pnpm db:generate    # Generate migration files
 pnpm db:migrate     # Run migrations
 pnpm db:studio      # Open Drizzle Studio (visual DB editor)
+
+# Testing
+pnpm test           # Run all tests
+pnpm test:watch     # Run tests in watch mode
+pnpm test:coverage  # Run tests with coverage report
 ```
 
 ### Frontend Development
@@ -554,6 +559,42 @@ pnpm preview
 # Lint code
 pnpm lint
 ```
+
+## 🧪 Testing
+
+The backend includes a comprehensive test suite using Jest and TypeScript.
+
+### Running Tests
+
+```bash
+cd backend
+
+# Run all tests
+pnpm test
+
+# Run tests in watch mode (auto-rerun on changes)
+pnpm test:watch
+
+# Run tests with coverage report
+pnpm test:coverage
+```
+
+### Test Coverage
+
+The test suite includes:
+
+- **Unit Tests**: Controllers, middleware, utilities
+- **Integration Tests**: API endpoints, database operations
+- **Mocked Dependencies**: Database, authentication, file uploads
+
+Coverage areas:
+- ✅ User controller (CRUD operations)
+- ✅ Comment controller (authenticated & anonymous)
+- ✅ Picture controller (upload, retrieval, expiration)
+- ✅ Game controller (session management, verification)
+- ✅ Auth middleware (required & optional auth)
+
+See [`backend/src/__tests__/README.md`](backend/src/__tests__/README.md) for detailed testing documentation.
 
 ### Testing Unity Integration Locally
 
