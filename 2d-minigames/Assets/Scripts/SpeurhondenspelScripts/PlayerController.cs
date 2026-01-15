@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody2D))]
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour, IMobileControllable
 {
     public float moveSpeed = 5f;
     public float gridSize = 1f;
@@ -31,9 +31,7 @@ public class PlayerController : MonoBehaviour
         targetPos = rb.position;
 
         if (audioSource == null)
-        {
             audioSource = gameObject.AddComponent<AudioSource>();
-        }
     }
 
     private void OnEnable() => moveAction.Enable();
@@ -98,15 +96,19 @@ public class PlayerController : MonoBehaviour
             if (Mathf.Abs(dir.x) > Mathf.Abs(dir.y)) dir = new Vector2(Mathf.Sign(dir.x), 0);
             else if (dir != Vector2.zero) dir = new Vector2(0, Mathf.Sign(dir.y));
 
-            TryMove(dir); 
+            TryMove(dir);
         }
     }
 
-    public bool IsMovingPublic()
+    public void Move(Vector2 direction)
+    {
+        MoveWithJoystick(direction);
+    }
+
+    public bool IsMoving()
     {
         return isMoving;
     }
-
 
     private void FixedUpdate()
     {

@@ -2,7 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody2D))]
-public class XonixController : MonoBehaviour
+public class XonixController : MonoBehaviour, IMobileControllable
 {
     public float moveSpeed = 5f;
     public float gridSize = 1f;
@@ -28,8 +28,9 @@ public class XonixController : MonoBehaviour
     private void OnDisable() => moveAction.Disable();
 
     private void Update()
-    { 
+    {
         if (isMoving) return;
+
         Vector2 input = moveAction.ReadValue<Vector2>();
         if (Mathf.Abs(input.x) > Mathf.Abs(input.y))
             input = new Vector2(Mathf.Sign(input.x), 0);
@@ -37,6 +38,7 @@ public class XonixController : MonoBehaviour
             input = new Vector2(0, Mathf.Sign(input.y));
         else
             return;
+
         TryMove(input);
     }
 
@@ -44,12 +46,12 @@ public class XonixController : MonoBehaviour
     {
         Vector2 newPos = rb.position + dir * gridSize;
         int count = Physics2D.OverlapBox(
-     newPos,
-     Vector2.one * 0.8f,
-     0f,
-     ContactFilter2D.noFilter,
-     hitBuffer
- );
+            newPos,
+            Vector2.one * 0.8f,
+            0f,
+            ContactFilter2D.noFilter,
+            hitBuffer
+        );
         for (int i = 0; i < count; i++)
         {
             Collider2D hit = hitBuffer[i];
@@ -147,5 +149,21 @@ public class XonixController : MonoBehaviour
         transform.position = spawnPosition;
         isMoving = false;
         wasOnRedBlock = false;
+    }
+
+    public void Move(Vector2 direction)
+    {
+        if (!isMoving)
+        {
+            if (Mathf.Abs(direction.x) > Mathf.Abs(direction.y)) direction = new Vector2(Mathf.Sign(direction.x), 0);
+            else if (direction != Vector2.zero) direction = new Vector2(0, Mathf.Sign(direction.y));
+
+            TryMove(direction);
+        }
+    }
+
+    public bool IsMoving()
+    {
+        return isMoving;
     }
 }

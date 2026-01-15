@@ -9236,7 +9236,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MobileJoystickAdapter
   joystick: {fileID: 890128872}
-  playerController: {fileID: 1637272890}
+  controlledPlayer: {fileID: 1637272890}
   inputThreshold: 0.5
 --- !u!1001 &392560496
 PrefabInstance:
