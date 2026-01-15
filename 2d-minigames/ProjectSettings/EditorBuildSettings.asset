@@ -5,24 +5,30 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/StartScene.unity
     guid: 6c91c0b2bd8aec32c973423eec90d285
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/QuickMathScenes/QuickMathScene.unity
     guid: 358ac51dd31252f4c89916306716a820
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/PipeConnectScenes/Hard.unity
     guid: b9f2f7a3d2b508d498fee54278b6fe00
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Speurhondenspel/Test_Mechanics.unity
     guid: 8c9cfa26abfee488c85f1582747f6a02
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/Speurhondenspel/Hard_Speurhondenspel.unity
     guid: d6731aa4a5e566541a4ec19452b7efeb
-  - enabled: 1
+  - enabled: 0
     path: Assets/Scenes/FindTheMatchScenes/Easy.unity
     guid: 14ef30e320943f648bc9fac74f38f6bb
+  - enabled: 0
+    path: Assets/Scenes/Speurhondenspel/TestLevel_Easy.unity
+    guid: 282d8ae2702669b47b7c308cd87d7a42
+  - enabled: 1
+    path: Assets/Scenes/Speurhondenspel/TestLevel_Medium.unity
+    guid: 060499d908b67754db5310890deb7d7f
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0

@@ -91,6 +91,23 @@ public class PlayerController : MonoBehaviour
         isMoving = true;
     }
 
+    public void MoveWithJoystick(Vector2 dir)
+    {
+        if (!isMoving)
+        {
+            if (Mathf.Abs(dir.x) > Mathf.Abs(dir.y)) dir = new Vector2(Mathf.Sign(dir.x), 0);
+            else if (dir != Vector2.zero) dir = new Vector2(0, Mathf.Sign(dir.y));
+
+            TryMove(dir); 
+        }
+    }
+
+    public bool IsMovingPublic()
+    {
+        return isMoving;
+    }
+
+
     private void FixedUpdate()
     {
         if (!isMoving) return;
