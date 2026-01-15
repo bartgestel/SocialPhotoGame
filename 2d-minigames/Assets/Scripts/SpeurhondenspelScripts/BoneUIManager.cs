@@ -10,13 +10,12 @@ public class BoneUIManager : MonoBehaviour
 
     private Image[] boneIcons;
     private int totalBones;
-    private int collectedBones = 0;
 
     private void Awake() { Instance = this; }
 
     private void Start()
     {
-        BonePickup[] bones = FindObjectsOfType<BonePickup>();
+        BonePickup[] bones = FindObjectsByType<BonePickup>(FindObjectsSortMode.None);
         totalBones = bones.Length;
         boneIcons = new Image[totalBones];
 

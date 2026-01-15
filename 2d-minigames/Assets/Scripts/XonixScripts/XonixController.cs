@@ -12,7 +12,6 @@ public class XonixController : MonoBehaviour
     public InputActionAsset inputActions;
     private InputAction moveAction;
     private static Collider2D[] hitBuffer = new Collider2D[8];
-    private bool isOnBorder = true;
     private bool wasOnRedBlock = false;
 
     private void Awake()
@@ -29,7 +28,7 @@ public class XonixController : MonoBehaviour
     private void OnDisable() => moveAction.Disable();
 
     private void Update()
-    {
+    { 
         if (isMoving) return;
         Vector2 input = moveAction.ReadValue<Vector2>();
         if (Mathf.Abs(input.x) > Mathf.Abs(input.y))
@@ -44,12 +43,13 @@ public class XonixController : MonoBehaviour
     private void TryMove(Vector2 dir)
     {
         Vector2 newPos = rb.position + dir * gridSize;
-        int count = Physics2D.OverlapBoxNonAlloc(
-            newPos,
-            Vector2.one * 0.8f,
-            0f,
-            hitBuffer
-        );
+        int count = Physics2D.OverlapBox(
+     newPos,
+     Vector2.one * 0.8f,
+     0f,
+     ContactFilter2D.noFilter,
+     hitBuffer
+ );
         for (int i = 0; i < count; i++)
         {
             Collider2D hit = hitBuffer[i];
@@ -81,7 +81,7 @@ public class XonixController : MonoBehaviour
 
     private void CheckBlockUnderPlayer()
     {
-        int count = Physics2D.OverlapPointNonAlloc(transform.position, hitBuffer);
+        int count = Physics2D.OverlapPoint(transform.position, ContactFilter2D.noFilter, hitBuffer);
         bool onBorderNow = false;
         bool onRedBlock = false;
         bool onEmptySpace = true;
@@ -111,7 +111,6 @@ public class XonixController : MonoBehaviour
             {
                 redBlock.TurnGreen();
                 wasOnRedBlock = true;
-                isOnBorder = false;
             }
         }
 
@@ -122,11 +121,6 @@ public class XonixController : MonoBehaviour
                 XonixManager.Instance.CompleteTrail();
             }
             wasOnRedBlock = false;
-            isOnBorder = true;
-        }
-        else if (onBorderNow)
-        {
-            isOnBorder = true;
         }
     }
 
@@ -153,6 +147,5 @@ public class XonixController : MonoBehaviour
         transform.position = spawnPosition;
         isMoving = false;
         wasOnRedBlock = false;
-        isOnBorder = true;
     }
 }
