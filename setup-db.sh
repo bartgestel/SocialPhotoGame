@@ -62,8 +62,14 @@ RETRY_COUNT=0
 MAX_RETRIES=30
 
 while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-    if docker exec $CONTAINER_NAME pg_isready -U $DB_USER -d $DB_NAME &> /dev/null; then
+    if docker exec $CONTAINER_NAME pg_isready -U $DB_USER &> /dev/null; then
         echo -e "${GREEN}✓ Database is healthy and ready!${NC}"
+        
+        # Create database if it doesn't exist
+        echo -e "${BLUE}Ensuring database '${DB_NAME}' exists...${NC}"
+        docker exec $CONTAINER_NAME psql -U $DB_USER -tc "SELECT 1 FROM pg_database WHERE datname = '${DB_NAME}'" | grep -q 1 || \
+        docker exec $CONTAINER_NAME psql -U $DB_USER -c "CREATE DATABASE ${DB_NAME};"
+        echo -e "${GREEN}✓ Database '${DB_NAME}' ready!${NC}"
 
         # Run migrations
         echo -e "${BLUE}Running database migrations...${NC}"
