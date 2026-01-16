@@ -23,6 +23,21 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/FindTheMatchScenes/Easy.unity
     guid: 14ef30e320943f648bc9fac74f38f6bb
+  - enabled: 1
+    path: Assets/Scenes/MicroRacer/MediumLevel.unity
+    guid: 5668ab9806aeab544a612a98b0352c69
+  - enabled: 1
+    path: Assets/Scenes/MicroRacer/Free-Roam.unity
+    guid: 798a637a7006ac34290914bcd12cf5f5
+  - enabled: 1
+    path: Assets/Scenes/MicroRacer/EasyLevel.unity
+    guid: ef1f5f68b8da363488eace2ee0bb5bca
+  - enabled: 1
+    path: Assets/Scenes/MicroRacer/ExpertLevel.unity
+    guid: 46272b5e00ec62c4fa66a11dbae4daa8
+  - enabled: 1
+    path: Assets/Scenes/MicroRacer/HardLevel.unity
+    guid: 75669ca1851252c4098214a33e190e8e
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   m_UseUCBPForAssetBundles: 0

@@ -20,66 +20,83 @@ public class CarController : MonoBehaviour
     private bool countingDown = false;
 
     [Header("Finish Gate")]
-    public FinishLine finishLine; // drag your FinishLine object here
+    public FinishLine finishLine;
 
     void Start()
     {
         normalSpeed = speed;
 
-        // Block instant win on spawn (since you spawn on finish)
         if (finishLine != null)
-        {
             finishLine.ResetFinishGate();
-        }
 
-        // Start countdown at game start
         if (countdown != null)
-        {
             StartCoroutine(DoCountdown());
-        }
     }
 
     void Update()
     {
-        if (finished) return;
-        if (respawning) return;
-        if (countingDown) return;
+        if (finished || respawning || countingDown)
+            return;
 
+        // Drive forward
         transform.Translate(Vector3.up * speed * Time.deltaTime);
 
-        float steer = Input.GetAxisRaw("Horizontal");
-        if (steer != 0)
+        // Steering (keyboard + touch)
+        float steer = GetSteerInput();
+        if (steer != 0f)
         {
             transform.Rotate(Vector3.forward * -steer * turnSpeed * Time.deltaTime);
         }
 
+        // Oil slow-down
         speed = inOil ? slowSpeed : normalSpeed;
     }
+
+float GetSteerInput()
+{
+    // Keyboard (PC)
+    float steer = Input.GetAxisRaw("Horizontal");
+
+    // Mouse input (Editor testing)
+    if (Input.GetMouseButton(0)) // left mouse button held
+    {
+        if (Input.mousePosition.x < Screen.width / 2f)
+            steer = -1f;
+        else
+            steer = 1f;
+    }
+
+    // Touch input (Mobile)
+    if (Input.touchCount > 0)
+    {
+        Touch touch = Input.GetTouch(0);
+
+        if (touch.position.x < Screen.width / 2f)
+            steer = -1f;
+        else
+            steer = 1f;
+    }
+
+    return steer;
+}
+
 
     void OnTriggerEnter2D(Collider2D col)
     {
         if (col.CompareTag("Oil"))
-        {
             inOil = true;
-        }
-
-        // Finish is handled by FinishLine.cs now
     }
 
     void OnTriggerExit2D(Collider2D col)
     {
         if (col.CompareTag("Oil"))
-        {
             inOil = false;
-        }
     }
 
     void OnCollisionEnter2D(Collision2D col)
     {
         if (col.collider.CompareTag("Wall") && !respawning && !finished)
-        {
             StartCoroutine(Respawn());
-        }
     }
 
     private IEnumerator Respawn()
@@ -97,17 +114,11 @@ public class CarController : MonoBehaviour
         speed = oldSpeed;
         respawning = false;
 
-        // After respawn, also block instant win again until player leaves finish trigger
         if (finishLine != null)
-        {
             finishLine.ResetFinishGate();
-        }
 
-        // Start countdown again after respawn
         if (countdown != null)
-        {
             StartCoroutine(DoCountdown());
-        }
     }
 
     private IEnumerator DoCountdown()
