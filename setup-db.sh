@@ -43,16 +43,14 @@ if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
         echo -e "${GREEN}✓ Container is already running.${NC}"
     else
         echo -e "${YELLOW}Starting existing container...${NC}"
-        $DOCKER_COMPOSE up -d
+        docker start $CONTAINER_NAME
         echo -e "${GREEN}✓ Container started.${NC}"
+        sleep 3
     fi
 else
     echo -e "${BLUE}Creating new PostgreSQL container...${NC}"
-    $DOCKER_COMPOSE up -d
+    $DOCKER_COMPOSE up -d postgres
     echo -e "${GREEN}✓ Container created and started.${NC}"
-
-    # Wait for database to be ready
-    echo -e "${YELLOW}Waiting for database to be ready...${NC}"
     sleep 5
 fi
 
@@ -63,24 +61,29 @@ MAX_RETRIES=30
 
 while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
     if docker exec $CONTAINER_NAME pg_isready -U $DB_USER &> /dev/null; then
-        echo -e "${GREEN}✓ Database is healthy and ready!${NC}"
+        echo -e "${GREEN}✓ PostgreSQL is healthy and ready!${NC}"
         
         # Create database if it doesn't exist
-        echo -e "${BLUE}Ensuring database '${DB_NAME}' exists...${NC}"
-        docker exec $CONTAINER_NAME psql -U $DB_USER -tc "SELECT 1 FROM pg_database WHERE datname = '${DB_NAME}'" | grep -q 1 || \
-        docker exec $CONTAINER_NAME psql -U $DB_USER -c "CREATE DATABASE ${DB_NAME};"
-        echo -e "${GREEN}✓ Database '${DB_NAME}' ready!${NC}"
+        echo -e "${BLUE}Creating database '${DB_NAME}' if it doesn't exist...${NC}"
+        docker exec $CONTAINER_NAME psql -U $DB_USER -tc "SELECT 1 FROM pg_database WHERE datname = '${DB_NAME}'" | grep -q 1 && \
+            echo -e "${GREEN}✓ Database '${DB_NAME}' already exists.${NC}" || \
+            (docker exec $CONTAINER_NAME psql -U $DB_USER -c "CREATE DATABASE ${DB_NAME};" && \
+             echo -e "${GREEN}✓ Database '${DB_NAME}' created successfully!${NC}")
 
-        # Run migrations
-        echo -e "${BLUE}Running database migrations...${NC}"
-        cd backend
-        if pnpm db:push; then
-            echo -e "${GREEN}✓ Migrations completed successfully.${NC}"
-        else
-            echo -e "${YELLOW}Note: Migration command ran (check output above for details).${NC}"
-        fi
-        cd ..
-
+        echo ""
+        echo -e "${GREEN}=== Database Setup Complete ===${NC}"
+        echo -e "${BLUE}Connection Details:${NC}"
+        echo -e "  Host: localhost"
+        echo -e "  Port: ${DB_PORT}"
+        echo -e "  Database: ${DB_NAME}"
+        echo -e "  User: ${DB_USER}"
+        echo -e "  Password: ${DB_PASSWORD}"
+        echo ""
+        echo -e "${YELLOW}Next Steps:${NC}"
+        echo -e "  1. Run migrations: ${BLUE}cd backend && pnpm db:push${NC}"
+        echo -e "  2. Start dev server: ${BLUE}cd .. && ./start-dev.sh${NC}"
+        echo ""
+        
         exit 0
     fi
 
