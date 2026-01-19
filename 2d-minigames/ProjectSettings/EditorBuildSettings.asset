@@ -18,16 +18,16 @@ EditorBuildSettings:
     path: Assets/Scenes/FindTheMatchScenes/Hard.unity
     guid: 60e333e8bec85a2418bfea5b96e45e69
   - enabled: 1
-    path: Assets/Scenes/MicroRacer/Easy.unity
+    path: Assets/Scenes/MicroRacer/EasyLevel.unity
     guid: ef1f5f68b8da363488eace2ee0bb5bca
   - enabled: 1
-    path: Assets/Scenes/MicroRacer/Medium.unity
+    path: Assets/Scenes/MicroRacer/MediumLevel.unity
     guid: 5668ab9806aeab544a612a98b0352c69
   - enabled: 1
-    path: Assets/Scenes/MicroRacer/Hard.unity
+    path: Assets/Scenes/MicroRacer/HardLevel.unity
     guid: 75669ca1851252c4098214a33e190e8e
   - enabled: 1
-    path: Assets/Scenes/MicroRacer/Expert.unity
+    path: Assets/Scenes/MicroRacer/ExpertLevel.unity
     guid: 46272b5e00ec62c4fa66a11dbae4daa8
   - enabled: 1
     path: Assets/Scenes/Speurhondenspel/TestLevel_Easy.unity
