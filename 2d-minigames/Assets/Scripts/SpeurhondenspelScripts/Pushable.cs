@@ -10,7 +10,10 @@ public class Pushable : MonoBehaviour
     private bool isMoving = false;
     private Rigidbody2D rb;
 
-    private static Collider2D[] hitBuffer = new Collider2D[5]; 
+    private static Collider2D[] hitBuffer = new Collider2D[5];
+
+    public AudioClip pushableSound;
+    private AudioSource audioSource;
 
     private void Awake()
     {
@@ -20,6 +23,11 @@ public class Pushable : MonoBehaviour
         rb.angularVelocity = 0;
 
         targetPos = transform.position;
+
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
     }
 
     private void FixedUpdate()
@@ -40,7 +48,7 @@ public class Pushable : MonoBehaviour
 
         Vector2 newPos = (Vector2)transform.position + dir * gridSize;
 
-        int numHits = Physics2D.OverlapBoxNonAlloc(newPos, Vector2.one * 0.8f, 0f, hitBuffer);
+        int numHits = Physics2D.OverlapBox(newPos, Vector2.one * 0.8f, 0f, ContactFilter2D.noFilter, hitBuffer);
         for (int i = 0; i < numHits; i++)
         {
             Collider2D hit = hitBuffer[i];
@@ -64,6 +72,7 @@ public class Pushable : MonoBehaviour
 
         targetPos = newPos;
         isMoving = true;
+        audioSource.PlayOneShot(pushableSound);
         return true;
     }
 }
