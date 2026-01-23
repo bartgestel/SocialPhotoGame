@@ -36,7 +36,7 @@ public class XonixManager : MonoBehaviour
 
         if (currentTrail.Count == 0) return;
 
-        RedBlock[] allRedBlocks = FindObjectsOfType<RedBlock>();
+        RedBlock[] allRedBlocks = FindObjectsByType<RedBlock>(FindObjectsSortMode.None);
         HashSet<RedBlock> greenBlocks = new HashSet<RedBlock>(currentTrail);
 
         HashSet<RedBlock> visited = new HashSet<RedBlock>();

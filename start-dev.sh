@@ -40,7 +40,7 @@ if ./setup-db.sh; then
 else
     echo -e "${RED}Failed to setup database. Exiting.${NC}"
     exit 1
-fi
+
 
 # Start backend
 echo -e "${GREEN}[2/4] Starting backend server...${NC}"

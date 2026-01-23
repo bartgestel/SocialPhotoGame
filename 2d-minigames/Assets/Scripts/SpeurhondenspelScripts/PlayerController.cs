@@ -2,10 +2,12 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody2D))]
-public class PlayerController : MonoBehaviour
+public class PlayerController : MonoBehaviour, IMobileControllable
 {
     public float moveSpeed = 5f;
     public float gridSize = 1f;
+    private float lastThudTime = 0f;
+    private float thudCooldown = 0.3f;
 
     private Vector2 targetPos;
     private bool isMoving = false;
@@ -16,6 +18,9 @@ public class PlayerController : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private static Collider2D[] hitBuffer = new Collider2D[5];
 
+    public AudioClip ThudSound;
+    private AudioSource audioSource;
+
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -24,6 +29,9 @@ public class PlayerController : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         moveAction = inputActions.FindActionMap("Player").FindAction("Move");
         targetPos = rb.position;
+
+        if (audioSource == null)
+            audioSource = gameObject.AddComponent<AudioSource>();
     }
 
     private void OnEnable() => moveAction.Enable();
@@ -55,7 +63,7 @@ public class PlayerController : MonoBehaviour
     {
         Vector2 newPos = rb.position + dir * gridSize;
 
-        int count = Physics2D.OverlapBoxNonAlloc(newPos, Vector2.one * 0.8f, 0f, hitBuffer);
+        int count = Physics2D.OverlapBox(newPos, Vector2.one * 0.8f, 0f, ContactFilter2D.noFilter, hitBuffer);
         for (int i = 0; i < count; i++)
         {
             Collider2D hit = hitBuffer[i];
@@ -63,7 +71,15 @@ public class PlayerController : MonoBehaviour
 
             if (hit.CompareTag("Enemy")) continue;
 
-            if (!hit.CompareTag("Pushable")) return;
+            if (!hit.CompareTag("Pushable"))
+            {
+                if (Time.time >= lastThudTime + thudCooldown)
+                {
+                    audioSource.PlayOneShot(ThudSound);
+                    lastThudTime = Time.time;
+                }
+                return;
+            }
 
             Pushable p = hit.GetComponent<Pushable>();
             if (!p.TryPush(dir)) return;
@@ -71,6 +87,27 @@ public class PlayerController : MonoBehaviour
 
         targetPos = newPos;
         isMoving = true;
+    }
+
+    public void MoveWithJoystick(Vector2 dir)
+    {
+        if (!isMoving)
+        {
+            if (Mathf.Abs(dir.x) > Mathf.Abs(dir.y)) dir = new Vector2(Mathf.Sign(dir.x), 0);
+            else if (dir != Vector2.zero) dir = new Vector2(0, Mathf.Sign(dir.y));
+
+            TryMove(dir);
+        }
+    }
+
+    public void Move(Vector2 direction)
+    {
+        MoveWithJoystick(direction);
+    }
+
+    public bool IsMoving()
+    {
+        return isMoving;
     }
 
     private void FixedUpdate()

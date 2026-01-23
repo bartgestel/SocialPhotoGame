@@ -11,7 +11,10 @@ public class SpeurhondenManager : MonoBehaviour
     private bool isGameOver = false;
     private Vector3 lastCheckpoint;
 
-    public int gridSize = 2; 
+    public int gridSize = 2;
+
+    public AudioClip BonePickupSound;
+    public AudioSource audioSource;
 
     private void Awake()
     {
@@ -24,6 +27,12 @@ public class SpeurhondenManager : MonoBehaviour
         deathPanel.SetActive(false);
         
         LoadPuzzlePiecesIfNeeded();
+
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
     }
 
     private void LoadPuzzlePiecesIfNeeded()
@@ -58,7 +67,7 @@ public class SpeurhondenManager : MonoBehaviour
 
         Debug.Log($"Successfully loaded {pieces.Length} puzzle pieces");
 
-        BonePickup[] bones = FindObjectsOfType<BonePickup>();
+        BonePickup[] bones = FindObjectsByType<BonePickup>(FindObjectsSortMode.None);
         
         Debug.Log($"Found {bones.Length} bones to replace with puzzle pieces");
 
@@ -87,14 +96,14 @@ public class SpeurhondenManager : MonoBehaviour
         isGameOver = false;
         Time.timeScale = 1f;
 
-        PlayerController player = FindObjectOfType<PlayerController>();
+        PlayerController player = FindFirstObjectByType<PlayerController>();
         if (player != null)
         {
             player.transform.position = lastCheckpoint;
             player.ResetMovement();
         }
 
-        ResettableObject[] resettables = FindObjectsOfType<ResettableObject>();
+        ResettableObject[] resettables = FindObjectsByType<ResettableObject>(FindObjectsSortMode.None);
 
         foreach (ResettableObject resettable in resettables)
         {
@@ -102,13 +111,22 @@ public class SpeurhondenManager : MonoBehaviour
         }
 
         if (deathPanel != null)
+        {
             deathPanel.SetActive(false);
+        }
+
+        if (audioSource != null)
+        {
+            audioSource.Play();
+        }
+
     }
 
     public void CollectBone()
     {
         bonesCollected++;
         BoneUIManager.Instance.UpdateUI(bonesCollected);
+        audioSource.PlayOneShot(BonePickupSound);
     }
 
     public void SetCheckpoint(Vector3 checkpointPosition)

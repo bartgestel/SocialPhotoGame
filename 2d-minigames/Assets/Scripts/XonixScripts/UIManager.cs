@@ -16,6 +16,9 @@ public class UIManager : MonoBehaviour
     public int squaresToWin = 800;
     public TextMeshProUGUI victoryText;
 
+    [Header("Death Panel")]
+    public GameObject deathPanel; // Assign your death panel GameObject here
+
     [Header("Player")]
     public XonixController player;
     public Vector2 playerSpawnPosition;
@@ -46,6 +49,11 @@ public class UIManager : MonoBehaviour
         {
             victoryText.gameObject.SetActive(false);
         }
+
+        if (deathPanel != null)
+        {
+            deathPanel.SetActive(false);
+        }
     }
 
     public int GetCurrentLives()
@@ -56,7 +64,6 @@ public class UIManager : MonoBehaviour
     public void AddDeletedSquares(int count)
     {
         squaresDeleted += count;
-
         if (squaresDeleted >= squaresToWin)
         {
             Victory();
@@ -66,9 +73,7 @@ public class UIManager : MonoBehaviour
     public void PlayerDied()
     {
         currentLives--;
-
         Debug.Log($"Player died! Lives remaining: {currentLives}");
-
         UpdateLivesUI();
 
         if (currentLives <= 0)
@@ -105,7 +110,6 @@ public class UIManager : MonoBehaviour
     private void Victory()
     {
         Debug.Log("VICTORY!");
-
         if (victoryText != null)
         {
             victoryText.gameObject.SetActive(true);
@@ -124,10 +128,9 @@ public class UIManager : MonoBehaviour
     {
         Debug.Log("GAME OVER!");
 
-        if (victoryText != null)
+        if (deathPanel != null)
         {
-            victoryText.gameObject.SetActive(true);
-            victoryText.text = "GAME OVER";
+            deathPanel.SetActive(true);
         }
 
         Time.timeScale = 0f;
