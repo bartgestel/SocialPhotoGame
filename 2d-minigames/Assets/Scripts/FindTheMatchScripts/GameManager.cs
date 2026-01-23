@@ -215,8 +215,9 @@ public class GameManager : MonoBehaviour
 			gameOver = true;
 			canFlip = false;
 
-			if (winSound != null)
+			if (winSound != null){
 				audioSource.PlayOneShot(winSound);
+			}
 
 			if (GameCoordinatorScript.Instance != null)
 			{

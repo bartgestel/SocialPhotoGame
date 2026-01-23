@@ -81,7 +81,8 @@ while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
         echo ""
         echo -e "${YELLOW}Next Steps:${NC}"
         echo -e "  1. Run migrations: ${BLUE}cd backend && pnpm db:push${NC}"
-        echo -e "  2. Start dev server: ${BLUE}cd .. && ./start-dev.sh${NC}"
+        echo -e "  2. Seed games data: ${BLUE}pnpm run seed:games${NC}"
+        echo -e "  3. Start dev server: ${BLUE}cd .. && ./start-dev.sh${NC}"
         echo ""
         
         exit 0
